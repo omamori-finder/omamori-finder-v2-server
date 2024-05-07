@@ -1,0 +1,1 @@
+# omamori-finder-v2
