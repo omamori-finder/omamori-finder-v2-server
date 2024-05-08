@@ -3,6 +3,8 @@ VENV=venv
 BIN= source $(VENV)/bin/activate
 PYTHON=${}/
 
+# docker container run --rm -v ./src:/code/src -p 8080:80 omamori-app:dev
+
 # Make it work on windows
 ifeq ($(OS), Windows_NT)
 	BIN=$(VENV)\Scripts\activate
