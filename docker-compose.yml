@@ -1,0 +1,8 @@
+services:
+  server:
+    image: omamori-finder-dev
+    build: .
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src:/code/src

@@ -12,7 +12,7 @@ ifeq ($(OS), Windows_NT)
 	PY=py
 endif
 
-.PHONY: venv activate clean
+.PHONY: venv activate clean build
 # Create virtual environment
 venv: $(VENV)
 
@@ -27,6 +27,14 @@ install: venv requirements.txt
 # Run the FastAPI server
 runserver: venv
 	fastapi dev src/main.py
+
+build:
+	@echo "Build and start container 🐳"
+	docker compose up
+
+stopcontainer:
+	@echo "Stop and remove container 🐋"
+	docker compose down
 
 activate: venv
 	$(BIN)
