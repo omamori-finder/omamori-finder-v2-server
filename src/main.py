@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from src.routes import omamori
+from src.routers import omamori
 
 app = FastAPI()
 
