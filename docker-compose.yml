@@ -1,4 +1,14 @@
 services:
+  dynamodbLocal:
+    image: amazon/dynamodb-local
+    restart: always
+    ports:
+      - 8000:8000
+    healthcheck:
+      test: ["CMD-SHELL",'if [ "$(curl -s -o /dev/null -I -w ''%{http_code}'' http://localhost:8000)" == "400" ]; then exit 0; else exit 1; fi']
+      interval: 1s
+      timeout: 10s
+      retries: 3 
   server:
     image: omamori-finder-dev
     build: .
@@ -6,8 +16,8 @@ services:
       - "8080:80"
     volumes:
       - ./src:/code/src
-  localDb:
-    image: amazon/dynamodb-local
+    depends_on:
+      dynamodbLocal:
+        condition: service_healthy
+        restart: true
     restart: always
-    ports:
-      - 8000:8000

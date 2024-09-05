@@ -1,13 +1,44 @@
+import boto3
+import botocore.exceptions
+import logging
 
-from pymongo import MongoClient
-from pymongo.server_api import ServerApi
+logger = logging.getLogger(__name__)
 
-uri = 'mongodb+srv://shippiotest:p9mQVWwF0dcViDKe@cluster0.6s3icyh.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
-# Create a new client and connect to the server
-client = MongoClient(uri, server_api=ServerApi('1'))
-# Send a ping to confirm a successful connection
-try:
-    client.admin.command('ping')
-    print("Pinged your deployment. You successfully connected to MongoDB!")
-except Exception as e:
-    print(e)
+dynamodb = boto3.client("dynamodb", endpoint_url='http://localhost:8000')
+
+
+def create_table(table_name: str):
+    try:
+        omamori_table = dynamodb.create_table(
+            TableName=table_name,
+            KeySchema=[
+                {
+                    "AttributeName": "uuid",
+                    "KeyType": "HASH"
+                }
+            ],
+            AttributeDefinitions=[
+                {
+                    "AttributeName": "uuid",
+                    "AttributeType": "S"
+                },
+            ],
+            ProvisionedThroughput={
+                'ReadCapacityUnits': 5,
+                'WriteCapacityUnits': 5
+            }
+        )
+
+        logger.error(f"{table_name} is {
+                     omamori_table['TableDescription']['TableStatus']}"
+                     )
+    except botocore.exceptions.ClientError as err:
+        logger.error("Couldn't create table %s. Here's why: %s: %s",
+                     table_name,
+                     err.response["Error"]["Code"],
+                     err.response["Error"]["Message"]
+                     )
+        raise
+
+
+create_table("omamori")
