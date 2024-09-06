@@ -5,7 +5,7 @@ services:
     ports:
       - 8000:8000
     healthcheck:
-      test: ["CMD-SHELL",'if [ "$(curl -s -o /dev/null -I -w ''%{http_code}'' http://localhost:8000)" == "400" ]; then exit 0; else exit 1; fi']
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/shell/ || exit 0"]
       interval: 1s
       timeout: 10s
       retries: 3 
@@ -16,6 +16,7 @@ services:
       - "8080:80"
     volumes:
       - ./src:/code/src
+      - ./requirements.txt:/code/requirements.txt
     depends_on:
       dynamodbLocal:
         condition: service_healthy

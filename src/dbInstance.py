@@ -1,10 +1,17 @@
 import boto3
 import botocore.exceptions
+from botocore.config import Config
 import logging
 
 logger = logging.getLogger(__name__)
 
-dynamodb = boto3.client("dynamodb", endpoint_url='http://localhost:8000')
+dynamodb = boto3.client(
+    "dynamodb",
+    endpoint_url="http://host.docker.internal:8000",
+    aws_access_key_id="testid",
+    aws_secret_access_key="mysecret",
+    region_name='localhost'
+)
 
 
 def create_table(table_name: str):
@@ -24,14 +31,13 @@ def create_table(table_name: str):
                 },
             ],
             ProvisionedThroughput={
-                'ReadCapacityUnits': 5,
-                'WriteCapacityUnits': 5
+                "ReadCapacityUnits": 5,
+                "WriteCapacityUnits": 5
             }
         )
 
-        logger.error(f"{table_name} is {
-                     omamori_table['TableDescription']['TableStatus']}"
-                     )
+        logger.error(table_name, "is",
+                     omamori_table["TableDescription"]["TableStatus"])
     except botocore.exceptions.ClientError as err:
         logger.error("Couldn't create table %s. Here's why: %s: %s",
                      table_name,
@@ -41,4 +47,4 @@ def create_table(table_name: str):
         raise
 
 
-create_table("omamori")
+# create_table('omamori')
