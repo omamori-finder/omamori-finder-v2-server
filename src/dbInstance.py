@@ -5,6 +5,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Some strange behavior here when using localhost as endpoint url to point to the docker container sometimes fails
+# If this happens use the following url http://host.docker.internal:8000
 dynamodb = boto3.client(
     "dynamodb",
     endpoint_url="http://host.docker.internal:8000",
@@ -36,14 +38,14 @@ def create_table(table_name: str):
             }
         )
 
-        logger.error(table_name, "is",
-                     omamori_table["TableDescription"]["TableStatus"])
+        print(table_name, "is",
+              omamori_table["TableDescription"]["TableStatus"])
     except botocore.exceptions.ClientError as err:
-        logger.error("Couldn't create table %s. Here's why: %s: %s",
-                     table_name,
-                     err.response["Error"]["Code"],
-                     err.response["Error"]["Message"]
-                     )
+        print("Couldn't create table %s. Here's why: %s: %s",
+              table_name,
+              err.response["Error"]["Code"],
+              err.response["Error"]["Message"]
+              )
         raise
 
 
