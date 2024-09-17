@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter
 from src.schemas.omamori import OmamoriInput, Omamori
 import src.service.omamori_service as service
@@ -11,6 +12,7 @@ async def get_omamori():
 
 
 @router.post('/omamori')
-async def create_omamori(omamori: OmamoriInput):
-    new_omamori = await service.create_omamori(omamori=omamori)
+async def create_omamori(omamori: OmamoriInput) -> Omamori:
+    logging.info(f"received omamori is {omamori}")
+    new_omamori = service.create_omamori(omamori=omamori)
     return new_omamori
