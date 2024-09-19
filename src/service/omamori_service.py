@@ -1,11 +1,11 @@
-import boto3
 import logging
 import uuid
 from fastapi import HTTPException
 from botocore.exceptions import ClientError
-from src.schemas.omamori import OmamoriInput, Omamori
+from src.schemas.omamori import OmamoriInput
 from datetime import datetime
 from src.dbInstance import dynamodb
+from result import ErrorCode
 
 # primary key is uuid
 
@@ -18,16 +18,18 @@ def create_omamori(omamori: OmamoriInput):
         db_entity = map_request_to_db_entity(
             omamori=omamori, uuid=omamori_uuid)
         response = omamori_table.put_item(Item=db_entity)
-        print('RESPONSE', response)
         return db_entity
     except ClientError as err:
         logging.error(
             "Couldn't add omamori %s to table %s. Here's why: %s: %s",
-            'omamori',
+            "omamori",
             err.response["Error"]["Code"],
             err.response["Error"]["Message"],
         )
-        raise HTTPException(status_code=400, detail="Could not create omamori")
+        raise HTTPException(status_code=400, detail={
+            "field": "create_omamori",
+            "error_code": ErrorCode.SERVER_ERROR
+        })
 
 
 def map_request_to_db_entity(omamori: OmamoriInput, uuid: str):
