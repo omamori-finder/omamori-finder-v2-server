@@ -6,12 +6,12 @@ import src.service.omamori_service as service
 router = APIRouter()
 
 
-@router.get('/omamori')
+@router.get("/omamori")
 async def get_omamori():
-    return {'Here are some omamori 🎏'}
+    return {"Here are some omamori 🎏"}
 
 
-@router.post('/omamori')
+@router.post("/omamori")
 async def create_omamori(omamori: OmamoriInput) -> Omamori:
     logging.info(f"received omamori is {omamori}")
     new_omamori = service.create_omamori(omamori=omamori)

@@ -12,7 +12,7 @@ dynamodb = boto3.resource(
     endpoint_url="http://host.docker.internal:8000",
     aws_access_key_id="testid",
     aws_secret_access_key="mysecret",
-    region_name='localhost'
+    region_name="localhost"
 )
 
 

@@ -35,11 +35,11 @@ def create_omamori(omamori: OmamoriInput):
 def map_request_to_db_entity(omamori: OmamoriInput, uuid: str):
     current_date = datetime.now().isoformat()
     return {
-        'uuid': uuid,
-        'shrine_name': omamori.shrine_name,
-        'google_maps_link': omamori.google_maps_link,
-        'photo_url': omamori.photo_url,
-        'description': omamori.description,
-        'updated_at': current_date,
-        'created_at': current_date
+        "uuid": uuid,
+        "shrine_name": omamori.shrine_name,
+        "google_maps_link": omamori.google_maps_link,
+        "photo_url": omamori.photo_url,
+        "description": omamori.description,
+        "updated_at": current_date,
+        "created_at": current_date
     }
