@@ -5,7 +5,7 @@ from botocore.exceptions import ClientError
 from src.schemas.omamori import OmamoriInput
 from datetime import datetime
 from src.dbInstance import dynamodb
-from result import ErrorCode
+from src.result import ErrorCode
 
 # primary key is uuid
 
@@ -17,7 +17,7 @@ def create_omamori(omamori: OmamoriInput):
         omamori_uuid = str(uuid.uuid4())
         db_entity = map_request_to_db_entity(
             omamori=omamori, uuid=omamori_uuid)
-        response = omamori_table.put_item(Item=db_entity)
+        omamori_table.put_item(Item=db_entity)
         return db_entity
     except ClientError as err:
         logging.error(
@@ -38,8 +38,11 @@ def map_request_to_db_entity(omamori: OmamoriInput, uuid: str):
         "uuid": uuid,
         "shrine_name": omamori.shrine_name,
         "google_maps_link": omamori.google_maps_link,
-        "photo_url": omamori.photo_url,
+        "prefecture": omamori.prefecture,
         "description": omamori.description,
+        "protection_type": omamori.protection_type,
+        "shrine_religion": omamori.shrine_religion,
+        "photo_url": omamori.photo_url,
         "updated_at": current_date,
         "created_at": current_date
     }
