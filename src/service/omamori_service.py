@@ -18,6 +18,7 @@ def create_omamori(omamori: OmamoriInput):
         db_entity = map_request_to_db_entity(
             omamori=omamori, uuid=omamori_uuid)
         omamori_table.put_item(Item=db_entity)
+        # TO DO: on succesful creation log "omamori is succesful created"
         return db_entity
     except ClientError as err:
         logging.error(
@@ -26,10 +27,7 @@ def create_omamori(omamori: OmamoriInput):
             err.response["Error"]["Code"],
             err.response["Error"]["Message"],
         )
-        raise HTTPException(status_code=400, detail={
-            "field": "create_omamori",
-            "error_code": ErrorCode.SERVER_ERROR
-        })
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 def map_request_to_db_entity(omamori: OmamoriInput, uuid: str):

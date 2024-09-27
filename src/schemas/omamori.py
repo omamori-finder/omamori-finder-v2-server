@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field, UUID4
 from datetime import datetime
 from enum import Enum
 from src.enum_types import PrefectureEnum, ShrineReligionEnum, ProtectionTypeEnum
+from src.result import ErrorCode
 
 
 class OmamoriInput(BaseModel):
@@ -15,14 +16,7 @@ class OmamoriInput(BaseModel):
     photo_url: str = Field(examples=['url/something'])
 
 
-class Omamori(BaseModel):
+class OmamoriOut(OmamoriInput):
     uuid: UUID4
-    shrine_name: str
-    google_maps_link: str
-    prefecture: PrefectureEnum
-    description: str | None = None
-    protection_type: ProtectionTypeEnum
-    shrine_religion: ShrineReligionEnum
-    photo_url: str
     updated_at: datetime
     created_at: datetime
