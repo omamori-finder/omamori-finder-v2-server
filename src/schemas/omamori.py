@@ -2,7 +2,6 @@ from pydantic import BaseModel, Field, UUID4
 from datetime import datetime
 from enum import Enum
 from src.enum_types import PrefectureEnum, ShrineReligionEnum, ProtectionTypeEnum
-from src.result import ErrorCode
 
 
 class OmamoriInput(BaseModel):

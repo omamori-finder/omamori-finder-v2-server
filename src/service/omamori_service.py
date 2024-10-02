@@ -5,7 +5,7 @@ from botocore.exceptions import ClientError
 from src.schemas.omamori import OmamoriInput
 from datetime import datetime
 from src.dbInstance import dynamodb
-from src.result import CustomException, ErrorCode
+from src.custom_error import CustomException, ErrorCode
 
 # primary key is uuid
 

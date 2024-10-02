@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from src.routers import omamori
-from src.result import add_custom_error
+from src.custom_error import add_custom_error
 import logging
 
 logging.basicConfig(level=logging.INFO,
