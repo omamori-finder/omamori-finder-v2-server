@@ -5,7 +5,7 @@ from botocore.exceptions import ClientError
 from src.schemas.omamori import OmamoriInput
 from datetime import datetime
 from src.dbInstance import dynamodb
-from src.result import ErrorCode
+from src.result import CustomException, ErrorCode
 
 # primary key is uuid
 
@@ -27,7 +27,8 @@ def create_omamori(omamori: OmamoriInput):
             err.response["Error"]["Code"],
             err.response["Error"]["Message"],
         )
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise CustomException(field="create_omamori",
+                              error_code=ErrorCode.SERVER_ERROR)
 
 
 def map_request_to_db_entity(omamori: OmamoriInput, uuid: str):
