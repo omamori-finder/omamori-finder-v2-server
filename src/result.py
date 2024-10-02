@@ -11,16 +11,17 @@ class ErrorCode(Enum):
 
 
 class CustomException(Exception):
-    def __init__(self, field: str, error_code: ErrorCode) -> None:
+    def __init__(self, field: str, error_code: ErrorCode, status_code: int) -> None:
         self.field = field
         self.error_code = error_code
+        self.status_code = status_code
 
 
-def add_internal_server_error(app: FastAPI):
+def add_custom_error(app: FastAPI):
     @app.exception_handler(CustomException)
-    async def internal_server_error(request: Request, error: CustomException):
+    async def custom_error(request: Request, error: CustomException):
         return JSONResponse(
-            status_code=500,
+            status_code=error.status_code,
             content={
                 "field": error.field,
                 "erroCode": error.error_code.value

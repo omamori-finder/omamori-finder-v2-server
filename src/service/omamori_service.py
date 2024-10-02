@@ -28,7 +28,9 @@ def create_omamori(omamori: OmamoriInput):
             err.response["Error"]["Message"],
         )
         raise CustomException(field="create_omamori",
-                              error_code=ErrorCode.SERVER_ERROR)
+                              error_code=ErrorCode.SERVER_ERROR,
+                              status_code=500
+                              )
 
 
 def map_request_to_db_entity(omamori: OmamoriInput, uuid: str):
