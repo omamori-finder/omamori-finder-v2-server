@@ -1,5 +1,6 @@
 import logging
 import uuid
+from typing import TypedDict
 from fastapi import HTTPException
 from botocore.exceptions import ClientError
 from src.schemas.omamori import OmamoriInput
@@ -47,3 +48,23 @@ def map_request_to_db_entity(omamori: OmamoriInput, uuid: str):
         "updated_at": current_date,
         "created_at": current_date
     }
+
+
+class ValidationError(TypedDict):
+    has_error: bool
+
+
+def validate_create_omamori(omamori: OmamoriInput):
+    validation_error: ValidationError = {
+        "has_errors": False
+    }
+
+    return validation_error
+
+
+def validate_shrine_name(shrine_name: str, validation_error: ValidationError):
+
+    if len(shrine_name.strip()) < 1:
+        validation_error["has_error"] = True
+
+    return validation_error
