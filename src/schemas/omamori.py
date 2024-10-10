@@ -5,14 +5,16 @@ from src.enum_types import PrefectureEnum, ShrineReligionEnum, ProtectionTypeEnu
 
 
 class OmamoriInput(BaseModel):
-    shrine_name: str = Field(examples=['Meiji Jingu'])
+    shrine_name: str = Field(
+        examples=['Meiji Jingu'], min_length=5, max_length=65)
     google_maps_link: str = Field(
-        examples=['https://maps.app.goo.gl/RAAtiAsSBkA5X2UM6'])
+        examples=['https://maps.app.goo.gl/RAAtiAsSBkA5X2UM6'], max_length=150, min_length=25)
     prefecture: PrefectureEnum
-    description: str | None = None
+    description: str | None = Field(max_length=500)
     protection_type: ProtectionTypeEnum
     shrine_religion: ShrineReligionEnum
-    photo_url: str = Field(examples=['url/something'])
+    photo_url: str = Field(
+        examples=['url/something'], max_length=2000, min_length=1)
 
 
 class OmamoriOut(OmamoriInput):
