@@ -8,6 +8,7 @@ class ErrorCode(Enum):
     NOT_FOUND = "NOT_FOUND"
     REQUIRED = "REQUIRED"
     MISSING_INPUT = "MISSING_INPUT"
+    VALIDATION_ERROR = "VALIDATION_ERROR"
 
 
 class CustomException(Exception):

@@ -7,6 +7,7 @@ from src.schemas.omamori import OmamoriInput
 from datetime import datetime
 from src.dbInstance import dynamodb
 from src.custom_error import CustomException, ErrorCode
+from src.utils.string_utils import has_special_characters, has_script_tags
 
 # primary key is uuid
 
@@ -15,6 +16,12 @@ omamori_table = dynamodb.Table("omamori")
 
 def create_omamori(omamori: OmamoriInput):
     try:
+        validation_error = validate_create_omamori(omamori=omamori)
+
+        if validation_error["has_error"]:
+            raise CustomException(
+                field="create_omamori", error_code=ErrorCode.VALIDATION_ERROR, status_code=402)
+
         omamori_uuid = str(uuid.uuid4())
         db_entity = map_request_to_db_entity(
             omamori=omamori, uuid=omamori_uuid)
@@ -55,9 +62,10 @@ class ValidationError(TypedDict):
 
 
 def validate_create_omamori(omamori: OmamoriInput):
-    validation_error: ValidationError = {
-        "has_errors": False
-    }
+    validation_error = ValidationError(has_error=False)
+
+    validate_shrine_name(
+        shrine_name=omamori.shrine_name, validation_error=validation_error)
 
     return validation_error
 
@@ -65,6 +73,12 @@ def validate_create_omamori(omamori: OmamoriInput):
 def validate_shrine_name(shrine_name: str, validation_error: ValidationError):
 
     if len(shrine_name.strip()) < 1:
+        validation_error["has_error"] = True
+
+    if has_special_characters(shrine_name):
+        validation_error["has_error"] = True
+
+    if has_script_tags(shrine_name):
         validation_error["has_error"] = True
 
     return validation_error
