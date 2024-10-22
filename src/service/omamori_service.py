@@ -4,6 +4,7 @@ from typing import TypedDict
 from botocore.exceptions import ClientError
 from src.schemas.omamori import OmamoriForm
 from datetime import datetime
+from src.db.s3 import upload_file
 from src.dbInstance import dynamodb
 from src.custom_error import CustomException, ErrorCode
 from src.utils.string_utils import has_special_characters, has_script_tags
@@ -21,6 +22,18 @@ def create_omamori(omamori: OmamoriForm):
             raise CustomException(
                 field="create_omamori", error_code=ErrorCode.VALIDATION_ERROR, status_code=402)
 
+        uploaded_file = upload_file(omamori.photo_url)
+
+        if not uploaded_file:
+            raise CustomException(
+                field="create_omamori",
+                error_code=ErrorCode.SERVER_ERROR,
+                status_code=500
+            )
+        # create file name
+        # start transaction
+        # first upload the file to the s3 bucket, when that's successful;
+        # we can add our other data + metadata from s3 to our dynamo db
         omamori_uuid = str(uuid.uuid4())
         db_entity = map_request_to_db_entity(
             omamori=omamori, uuid=omamori_uuid)

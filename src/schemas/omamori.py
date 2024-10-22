@@ -1,7 +1,7 @@
 from pydantic import BaseModel, UUID4
 from typing import Annotated
 from dataclasses import dataclass
-from fastapi import Form, UploadFile
+from fastapi import Form, UploadFile, File
 from datetime import datetime
 from src.enum_types import PrefectureEnum, ShrineReligionEnum, ProtectionTypeEnum
 
@@ -16,7 +16,7 @@ class OmamoriForm:
     prefecture: Annotated[PrefectureEnum, Form(...)]
     protection_type: Annotated[ProtectionTypeEnum, Form(...)]
     shrine_religion: Annotated[ShrineReligionEnum, Form(...)]
-    photo_url: UploadFile
+    photo_url: UploadFile = File(...)
     description: str | None = Form(None)
 
 
