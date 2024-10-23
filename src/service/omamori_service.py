@@ -1,9 +1,8 @@
 import logging
 import uuid
 from typing import TypedDict
-from fastapi import HTTPException
 from botocore.exceptions import ClientError
-from src.schemas.omamori import OmamoriInput
+from src.schemas.omamori import OmamoriForm
 from datetime import datetime
 from src.dbInstance import dynamodb
 from src.custom_error import CustomException, ErrorCode
@@ -14,7 +13,7 @@ from src.utils.string_utils import has_special_characters, has_script_tags
 omamori_table = dynamodb.Table("omamori")
 
 
-def create_omamori(omamori: OmamoriInput):
+def create_omamori(omamori: OmamoriForm):
     try:
         validation_error = validate_create_omamori(omamori=omamori)
 
@@ -41,7 +40,7 @@ def create_omamori(omamori: OmamoriInput):
                               )
 
 
-def map_request_to_db_entity(omamori: OmamoriInput, uuid: str):
+def map_request_to_db_entity(omamori: OmamoriForm, uuid: str):
     current_date = datetime.now().isoformat()
     return {
         "uuid": uuid,
@@ -51,7 +50,7 @@ def map_request_to_db_entity(omamori: OmamoriInput, uuid: str):
         "description": omamori.description,
         "protection_type": omamori.protection_type,
         "shrine_religion": omamori.shrine_religion,
-        "photo_url": omamori.photo_url,
+        "photo_url": omamori.photo_url.filename,
         "updated_at": current_date,
         "created_at": current_date
     }
@@ -61,7 +60,7 @@ class ValidationError(TypedDict):
     has_error: bool
 
 
-def validate_create_omamori(omamori: OmamoriInput):
+def validate_create_omamori(omamori: OmamoriForm):
     validation_error = ValidationError(has_error=False)
 
     validate_shrine_name(
