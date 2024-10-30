@@ -11,6 +11,11 @@ async def get_omamori():
     return {"Here are some omamori 🎏"}
 
 
+@router.post("/upload")
+async def upload_omamori_picture():
+    return {"Omamori picture is uploaded"}
+
+
 @router.post("/omamori")
 async def create_omamori(omamori: OmamoriForm = Depends()) -> OmamoriOut:
     logging.info(f"received omamori is {omamori}")
