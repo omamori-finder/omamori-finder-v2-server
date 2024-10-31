@@ -1,23 +1,20 @@
-from pydantic import BaseModel, UUID4
-from typing import Annotated
-from dataclasses import dataclass
-from fastapi import Form, UploadFile
+from pydantic import BaseModel, UUID4, Field
 from datetime import datetime
-from src.enum_types import PrefectureEnum, ShrineReligionEnum, ProtectionTypeEnum
+from src.enum_types import PrefectureEnum, ShrineReligionEnum, ProtectionTypeEnum, UploadStatus
 
 # Since we are using form data we are not able to use pydantic as input, that's why
 # we needed to create a normal class
 
 
-@dataclass
-class OmamoriForm:
-    shrine_name: Annotated[str, Form(...)]
-    google_maps_link: Annotated[str, Form(...)]
-    prefecture: Annotated[PrefectureEnum, Form(...)]
-    protection_type: Annotated[ProtectionTypeEnum, Form(...)]
-    shrine_religion: Annotated[ShrineReligionEnum, Form(...)]
-    photo_url: UploadFile
-    description: str | None = Form(None)
+class OmamoriInput(BaseModel):
+    shrine_name: str = Field(examples=['Meiji Jingu'])
+    google_maps_link: str = Field(
+        examples=['https://maps.app.goo.gl/RAAtiAsSBkA5X2UM6'])
+    prefecture: PrefectureEnum
+    protection_type: ProtectionTypeEnum
+    shrine_religion: ShrineReligionEnum
+    description: str | None = None
+    upload_status: UploadStatus | None = UploadStatus.NOT_STARTED
 
 
 class OmamoriOut(BaseModel):
