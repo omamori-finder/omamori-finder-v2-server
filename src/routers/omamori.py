@@ -1,7 +1,7 @@
 import logging
 import src.service.omamori_service as service
 from fastapi import APIRouter, UploadFile, Form
-from src.schemas.omamori import OmamoriOut, OmamoriInput
+from src.schemas.omamori import OmamoriOut, OmamoriInput, OmamoriPictureOut
 
 router = APIRouter()
 
@@ -20,4 +20,6 @@ async def create_omamori(omamori: OmamoriInput) -> OmamoriOut:
 
 @router.post("/uploadpicture")
 async def upload_omamori_picture(picture: UploadFile, uuid: str = Form(...)):
-    return {"Omamori picture is uploaded"}
+    uploaded_picture = service.upload_omamori_picture(
+        picture=picture, uuid=uuid)
+    return uploaded_picture

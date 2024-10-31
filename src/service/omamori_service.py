@@ -4,6 +4,7 @@ from typing import TypedDict
 from botocore.exceptions import ClientError
 from src.schemas.omamori import OmamoriInput
 from datetime import datetime
+from src.db.s3 import upload_picture
 from src.dbInstance import dynamodb
 from src.custom_error import CustomException, ErrorCode
 from src.utils.string_utils import has_special_characters, has_script_tags
@@ -39,7 +40,20 @@ def create_omamori(omamori: OmamoriInput):
                               )
 
 
-# TO DO: Add service that handles the logic uploading the picture
+def upload_omamori_picture(picture, uuid: str):
+    try:
+        uploaded_picture_data = upload_picture(picture)
+
+        if uploaded_picture_data is None:
+            raise Exception
+
+        return uploaded_picture_data
+    except Exception as err:
+        print(err)
+        raise CustomException(field="Upload_omamori_picture",
+                              error_code=ErrorCode.SERVER_ERROR, status_code=500)
+    # TO DO: Add service that handles the logic uploading the picture
+
 
 def map_request_to_db_entity(omamori: OmamoriInput):
     current_date = datetime.now().isoformat()
