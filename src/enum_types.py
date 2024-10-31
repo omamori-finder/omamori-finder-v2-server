@@ -1,6 +1,13 @@
 from enum import Enum
 
 
+class UploadStatus(str, Enum):
+    NOT_STARTED = "NOT_STARTED"
+    UPLOADING = "UPLOADING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+
+
 class ShrineReligionEnum(str, Enum):
     Buddhism = "Buddhism"
     Shinto = "Shinto"

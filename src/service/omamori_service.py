@@ -2,9 +2,8 @@ import logging
 import uuid
 from typing import TypedDict
 from botocore.exceptions import ClientError
-from src.schemas.omamori import OmamoriForm
+from src.schemas.omamori import OmamoriInput
 from datetime import datetime
-from src.db.s3 import upload_file
 from src.dbInstance import dynamodb
 from src.custom_error import CustomException, ErrorCode
 from src.utils.string_utils import has_special_characters, has_script_tags
@@ -14,7 +13,7 @@ from src.utils.string_utils import has_special_characters, has_script_tags
 omamori_table = dynamodb.Table("omamori")
 
 
-def create_omamori(omamori: OmamoriForm):
+def create_omamori(omamori: OmamoriInput):
     try:
         validation_error = validate_create_omamori(omamori=omamori)
 
@@ -22,21 +21,8 @@ def create_omamori(omamori: OmamoriForm):
             raise CustomException(
                 field="create_omamori", error_code=ErrorCode.VALIDATION_ERROR, status_code=402)
 
-        uploaded_file = upload_file(omamori.photo_url)
+        db_entity = map_request_to_db_entity(omamori=omamori)
 
-        if not uploaded_file:
-            raise CustomException(
-                field="create_omamori",
-                error_code=ErrorCode.SERVER_ERROR,
-                status_code=500
-            )
-        # create file name
-        # start transaction
-        # first upload the file to the s3 bucket, when that's successful;
-        # we can add our other data + metadata from s3 to our dynamo db
-        omamori_uuid = str(uuid.uuid4())
-        db_entity = map_request_to_db_entity(
-            omamori=omamori, uuid=omamori_uuid)
         omamori_table.put_item(Item=db_entity)
         # TO DO: on succesful creation log "omamori is succesful created"
         return db_entity
@@ -53,17 +39,19 @@ def create_omamori(omamori: OmamoriForm):
                               )
 
 
-def map_request_to_db_entity(omamori: OmamoriForm, uuid: str):
+# TO DO: Add service that handles the logic uploading the picture
+
+def map_request_to_db_entity(omamori: OmamoriInput):
     current_date = datetime.now().isoformat()
     return {
-        "uuid": uuid,
+        "uuid": str(uuid.uuid4()),
         "shrine_name": omamori.shrine_name,
         "google_maps_link": omamori.google_maps_link,
         "prefecture": omamori.prefecture,
         "description": omamori.description,
         "protection_type": omamori.protection_type,
         "shrine_religion": omamori.shrine_religion,
-        "photo_url": omamori.photo_url.filename,
+        "upload_status": omamori.upload_status,
         "updated_at": current_date,
         "created_at": current_date
     }
@@ -73,7 +61,7 @@ class ValidationError(TypedDict):
     has_error: bool
 
 
-def validate_create_omamori(omamori: OmamoriForm):
+def validate_create_omamori(omamori: OmamoriInput):
     validation_error = ValidationError(has_error=False)
 
     validate_shrine_name(
