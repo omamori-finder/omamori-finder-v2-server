@@ -8,6 +8,7 @@ from src.db.s3 import upload_picture
 from src.dbInstance import dynamodb
 from src.custom_error import CustomException, ErrorCode
 from src.utils.string_utils import has_special_characters, has_script_tags
+from src.enum_types import UploadStatus
 
 # primary key is uuid
 
@@ -47,7 +48,30 @@ def upload_omamori_picture(picture, uuid: str):
         if uploaded_picture_data is None:
             raise Exception
 
-        return uploaded_picture_data
+        update_expression = "SET #upload_status = :upload_status, #picture_path = :picture_path, #updated_at = :updated_at"
+        expression_attribute_names = {
+            "#upload_status": "upload_status",
+            "#picture_path": "picture_path"
+        }
+
+        expression_attribute_values = {
+            ":upload_status": UploadStatus.COMPLETED,
+            ":picture_path": uploaded_picture_data,
+            ":updated_at": datetime.now().isoformat()
+        }
+
+        updated_omamori = omamori_table.update_item(
+            Key={
+                "uuid": uuid
+            },
+            UpdateExpression=update_expression,
+            ExpressionAttributeNames=expression_attribute_names,
+            ExpressionAttributeValues=expression_attribute_values,
+            # ReturnValues="UPDATED_NEW"
+        )
+
+        print("UPDATED FIELDS", updated_omamori)
+        return updated_omamori
     except Exception as err:
         print(err)
         raise CustomException(field="Upload_omamori_picture",

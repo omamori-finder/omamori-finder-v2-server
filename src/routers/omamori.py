@@ -22,4 +22,5 @@ async def create_omamori(omamori: OmamoriInput) -> OmamoriOut:
 async def upload_omamori_picture(picture: UploadFile, uuid: str = Form(...)):
     uploaded_picture = service.upload_omamori_picture(
         picture=picture, uuid=uuid)
+    print("Uploaded", uploaded_picture)
     return uploaded_picture
