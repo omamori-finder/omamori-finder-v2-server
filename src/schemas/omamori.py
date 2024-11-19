@@ -21,3 +21,7 @@ class OmamoriOut(BaseModel):
     uuid: UUID4
     updated_at: datetime
     created_at: datetime
+
+
+class OmamoriPictureOut(BaseModel):
+    object_key: str
