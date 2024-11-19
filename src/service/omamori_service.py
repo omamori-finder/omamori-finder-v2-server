@@ -1,7 +1,7 @@
 import logging
 import uuid
 from typing import TypedDict
-from botocore.exceptions import ClientError
+from botocore.exceptions import ClientError, BotoCoreError
 from src.schemas.omamori import OmamoriInput
 from datetime import datetime
 from src.db.s3 import upload_picture, delete_picture_by_object_name
@@ -48,51 +48,56 @@ def upload_omamori_picture(picture, uuid: str):
         if uploaded_picture_data is None:
             raise Exception
 
-        update_expression = "SET #upload_status = :upload_status, #picture_path = :picture_path, #updated_at = :updated_at"
-        expression_attribute_names = {
-            "#upload_status": "upload_status",
-            "#picture_path": "picture_path",
-            "#updated_at": "updated_at"
-        }
+    except Exception as err:
+        raise CustomException(field="Upload_omamori_picture",
+                              error_code=ErrorCode.SERVER_ERROR, status_code=500)
 
-        expression_attribute_values = {
-            ":upload_status": UploadStatus.COMPLETED,
-            ":picture_path": uploaded_picture_data,
-            ":updated_at": datetime.now().isoformat()
-        }
+    update_expression = "SET #upload_status = :upload_status, #picture_path = :picture_path, #updated_at = :updated_at"
 
+    expression_attribute_names = {
+        "#upload_status": "upload_status",
+        "#picture_path": "picture_path",
+        "#updated_at": "updated_at"
+    }
+
+    expression_attribute_values = {
+        ":upload_status": UploadStatus.COMPLETED,
+        ":picture_path": uploaded_picture_data,
+        ":updated_at": datetime.now().isoformat()
+    }
+
+    try:
+        updated_omamori = omamori_table.update_item(
+            Key={
+                "uuid": uuid
+            },
+            UpdateExpression=update_expression,
+            ExpressionAttributeNames=expression_attribute_names,
+            ExpressionAttributeValues=expression_attribute_values,
+            ReturnValues="UPDATED_NEW"
+        )
+    except (ClientError, BotoCoreError) as err:
         try:
-            updated_omamori = omamori_table.update_item(
-                Key={
-                    "uuid": uuid
-                },
-                UpdateExpression=update_expression,
-                ExpressionAttributeNames=expression_attribute_names,
-                ExpressionAttributeValues=expression_attribute_values,
-                ReturnValues="UPDATED_NEW"
-            )
-            return updated_omamori["Attributes"]
-        except ClientError as err:
-            print(err)
             deleted_picture = delete_picture_by_object_name(
                 object_name=uploaded_picture_data)
 
             if deleted_picture is None:
-                raise CustomException(field="Delete_picture_by_object_name",
-                                      error_code=ErrorCode.SERVER_ERROR, status_code=500)
+                raise Exception
 
-            logging.error("Couldn't updated omamori table",
-                          "Deleted the picture in the S3 bucket as response",
-                          deleted_picture)
-
-            raise CustomException(field="Upload_omamori_picture",
+        except Exception as err:
+            raise CustomException(field="Delete_picture_by_object_name",
                                   error_code=ErrorCode.SERVER_ERROR, status_code=500)
 
-    except Exception as err:
-        print(err)
+        logging.error("Couldn't updated omamori table",
+                      "Here's why",
+                      err,
+                      "Deleted the picture in the S3 bucket as response",
+                      deleted_picture)
+
         raise CustomException(field="Upload_omamori_picture",
                               error_code=ErrorCode.SERVER_ERROR, status_code=500)
-    # TO DO: Add service that handles the logic uploading the picture
+
+    return updated_omamori["Attributes"]
 
 
 def map_request_to_db_entity(omamori: OmamoriInput):
