@@ -71,11 +71,14 @@ def upload_omamori_picture(picture, uuid: str):
             ExpressionAttributeValues=expression_attribute_values,
             ReturnValues="UPDATED_NEW"
         )
+        return updated_omamori["Attributes"]
     except (ClientError, BotoCoreError) as err:
 
         if ClientError or BotoCoreError:
             deleted_picture = delete_picture_by_object_name(
                 object_name=uploaded_picture_data)
+
+            # TO DO: What to do if the picture was not deleted?
 
             logging.error("Couldn't updated omamori table",
                           "Here's why",
@@ -85,8 +88,6 @@ def upload_omamori_picture(picture, uuid: str):
 
         raise CustomException(field="Upload_omamori_picture",
                               error_code=ErrorCode.SERVER_ERROR, status_code=500)
-
-    return updated_omamori["Attributes"]
 
 
 def map_request_to_db_entity(omamori: OmamoriInput):
