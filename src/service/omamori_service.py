@@ -48,25 +48,20 @@ def upload_omamori_picture(picture, uuid: str):
         if uploaded_picture_data is None:
             raise Exception
 
-    except Exception as err:
-        raise CustomException(field="Upload_omamori_picture",
-                              error_code=ErrorCode.SERVER_ERROR, status_code=500)
+        update_expression = "SET #upload_status = :upload_status, #picture_path = :picture_path, #updated_at = :updated_at"
 
-    update_expression = "SET #upload_status = :upload_status, #picture_path = :picture_path, #updated_at = :updated_at"
+        expression_attribute_names = {
+            "#upload_status": "upload_status",
+            "#picture_path": "picture_path",
+            "#updated_at": "updated_at"
+        }
 
-    expression_attribute_names = {
-        "#upload_status": "upload_status",
-        "#picture_path": "picture_path",
-        "#updated_at": "updated_at"
-    }
+        expression_attribute_values = {
+            ":upload_status": UploadStatus.COMPLETED,
+            ":picture_path": uploaded_picture_data,
+            ":updated_at": datetime.now().isoformat()
+        }
 
-    expression_attribute_values = {
-        ":upload_status": UploadStatus.COMPLETED,
-        ":picture_path": uploaded_picture_data,
-        ":updated_at": datetime.now().isoformat()
-    }
-
-    try:
         updated_omamori = omamori_table.update_item(
             Key={
                 "uuid": uuid
@@ -76,28 +71,23 @@ def upload_omamori_picture(picture, uuid: str):
             ExpressionAttributeValues=expression_attribute_values,
             ReturnValues="UPDATED_NEW"
         )
+        return updated_omamori["Attributes"]
     except (ClientError, BotoCoreError) as err:
-        try:
+
+        if ClientError or BotoCoreError:
             deleted_picture = delete_picture_by_object_name(
                 object_name=uploaded_picture_data)
 
-            if deleted_picture is None:
-                raise Exception
+            # TO DO: What to do if the picture was not deleted?
 
-        except Exception as err:
-            raise CustomException(field="Delete_picture_by_object_name",
-                                  error_code=ErrorCode.SERVER_ERROR, status_code=500)
-
-        logging.error("Couldn't updated omamori table",
-                      "Here's why",
-                      err,
-                      "Deleted the picture in the S3 bucket as response",
-                      deleted_picture)
+            logging.error("Couldn't updated omamori table",
+                          "Here's why",
+                          err,
+                          "Deleted the picture in the S3 bucket as response",
+                          deleted_picture)
 
         raise CustomException(field="Upload_omamori_picture",
                               error_code=ErrorCode.SERVER_ERROR, status_code=500)
-
-    return updated_omamori["Attributes"]
 
 
 def map_request_to_db_entity(omamori: OmamoriInput):
