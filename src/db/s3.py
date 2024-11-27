@@ -11,6 +11,7 @@ def upload_picture(file, bucket='omamori-finder-pictures'):
         client = boto3.client('s3')
         object_name = f'media/{str(uuid.uuid4())}.jpg'
         client.upload_fileobj(file.file, bucket, object_name)
+    # Raise custom error here (string error)
     except ClientError as err:
         logging.error("Was not able to upload the picture to S3 bucket",
                       "Here is why",
