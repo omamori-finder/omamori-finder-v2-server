@@ -40,15 +40,14 @@ def create_omamori(omamori: OmamoriInput):
                               status_code=500
                               )
 
-#  => make type for picture (class)
-
 
 def upload_omamori_picture(picture, uuid: str):
+    #  TO DO: make type for picture (class)
     try:
-        # Don't rely on the exception because we raise an ex in upload_picture
+        # TO DO: Don't rely on a return here instead but raise/return exception upload_picture
         uploaded_picture_data = upload_picture(picture)
 
-        # Pull this out (refactor)
+        # TO DO: Remove this part if ^ is fixed
         if uploaded_picture_data is None:
             raise Exception
 
