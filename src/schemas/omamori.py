@@ -1,6 +1,6 @@
 from pydantic import BaseModel, UUID4, Field
 from datetime import datetime
-from src.enum_types import PrefectureEnum, ShrineReligionEnum, ProtectionTypeEnum, UploadStatus
+from src.utils.enum_types import PrefectureEnum, ShrineReligionEnum, ProtectionTypeEnum, UploadStatus
 
 # Since we are using form data we are not able to use pydantic as input, that's why
 # we needed to create a normal class

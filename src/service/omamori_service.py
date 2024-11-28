@@ -5,10 +5,10 @@ from botocore.exceptions import ClientError, BotoCoreError
 from src.schemas.omamori import OmamoriInput
 from datetime import datetime
 from src.db.s3 import upload_picture, delete_picture_by_object_name
-from src.dbInstance import dynamodb
+from src.db.dbInstance import dynamodb
 from src.custom_error import CustomException, ErrorCode
 from src.utils.string_utils import has_special_characters, has_script_tags
-from src.enum_types import UploadStatus
+from src.utils.enum_types import UploadStatus
 
 # primary key is uuid
 
@@ -42,9 +42,12 @@ def create_omamori(omamori: OmamoriInput):
 
 
 def upload_omamori_picture(picture, uuid: str):
+    #  TO DO: make type for picture (class)
     try:
+        # TO DO: Don't rely on a return here instead but raise/return exception upload_picture
         uploaded_picture_data = upload_picture(picture)
 
+        # TO DO: Remove this part if ^ is fixed
         if uploaded_picture_data is None:
             raise Exception
 
