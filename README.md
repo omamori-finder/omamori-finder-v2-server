@@ -24,3 +24,7 @@ To run without logs:
 ```bash
 docker compose up -d
 ```
+4. After the container is up and running, all we need to do is create a table in our dynamodb by running:
+```bash
+make createtable
+```
