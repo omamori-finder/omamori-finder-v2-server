@@ -72,7 +72,7 @@ def upload_omamori_picture(picture: UploadFile, uuid: str):
         return updated_omamori["Attributes"]
     except (ClientError, BotoCoreError, CustomException) as err:
         if CustomException:
-            return err
+            raise err
 
         if ClientError or BotoCoreError:
             deleted_picture = delete_picture_by_object_name(
