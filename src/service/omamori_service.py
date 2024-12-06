@@ -42,9 +42,9 @@ def create_omamori(omamori: OmamoriInput):
                               )
 
 
-def upload_omamori_picture(picture: UploadFile, uuid: str):
+def upload_omamori_picture(img_file: UploadFile, uuid: str):
     try:
-        uploaded_picture_data = upload_picture(picture)
+        uploaded_picture_data = upload_picture(img_file)
 
         update_expression = "SET #upload_status = :upload_status, #picture_path = :picture_path, #updated_at = :updated_at"
 

@@ -1,6 +1,7 @@
 import boto3
 import logging
 import uuid
+from fastapi import UploadFile
 from botocore.exceptions import ClientError, BotoCoreError
 from src.custom_error import CustomException
 from src.custom_error import ErrorCode
@@ -8,11 +9,11 @@ from src.custom_error import ErrorCode
 logger = logging.getLogger(__name__)
 
 
-def upload_picture(file, bucket='omamori-finder-pictures-development') -> str:
+def upload_picture(img_file: UploadFile, bucket='omamori-finder-pictures-development') -> str:
     try:
         client = boto3.client('s3')
         object_name = f'media/{str(uuid.uuid4())}.jpg'
-        client.upload_fileobj(file.file, bucket, object_name)
+        client.upload_fileobj(img_file.file, bucket, object_name)
         return object_name
     except (ClientError, BotoCoreError) as err:
         logging.error("Was not able to upload the picture to S3 bucket",
