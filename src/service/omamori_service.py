@@ -1,6 +1,7 @@
 import logging
 import uuid
 from typing import TypedDict
+from fastapi import UploadFile
 from botocore.exceptions import ClientError, BotoCoreError
 from src.schemas.omamori import OmamoriInput
 from datetime import datetime
@@ -41,15 +42,9 @@ def create_omamori(omamori: OmamoriInput):
                               )
 
 
-def upload_omamori_picture(picture, uuid: str):
-    #  TO DO: make type for picture (class)
+def upload_omamori_picture(img_file: UploadFile, uuid: str):
     try:
-        # TO DO: Don't rely on a return here instead but raise/return exception upload_picture
-        uploaded_picture_data = upload_picture(picture)
-
-        # TO DO: Remove this part if ^ is fixed
-        if uploaded_picture_data is None:
-            raise Exception
+        uploaded_picture_data = upload_picture(img_file)
 
         update_expression = "SET #upload_status = :upload_status, #picture_path = :picture_path, #updated_at = :updated_at"
 
@@ -75,7 +70,9 @@ def upload_omamori_picture(picture, uuid: str):
             ReturnValues="UPDATED_NEW"
         )
         return updated_omamori["Attributes"]
-    except (ClientError, BotoCoreError) as err:
+    except (ClientError, BotoCoreError, CustomException) as err:
+        if CustomException:
+            raise err
 
         if ClientError or BotoCoreError:
             deleted_picture = delete_picture_by_object_name(
@@ -88,9 +85,8 @@ def upload_omamori_picture(picture, uuid: str):
                           err,
                           "Deleted the picture in the S3 bucket as response",
                           deleted_picture)
-
-        raise CustomException(field="Upload_omamori_picture",
-                              error_code=ErrorCode.SERVER_ERROR, status_code=500)
+            raise CustomException(field="Upload_omamori_picture",
+                                  error_code=ErrorCode.SERVER_ERROR, status_code=500)
 
 
 def map_request_to_db_entity(omamori: OmamoriInput):
