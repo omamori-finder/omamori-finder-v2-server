@@ -20,3 +20,11 @@ def has_script_tags(string_value: str) -> bool:
         return True
 
     return False
+
+
+def has_google_maps_url(string_value: str) -> bool:
+    regex_google_maps_url = r"^(https?)://(maps\.app\.goo\.gl|www\.google\.com/maps)/"
+    contains_google_maps_url = re.search(regex_google_maps_url, string_value)
+    if contains_google_maps_url == None:
+        return False
+    return
