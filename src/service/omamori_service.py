@@ -8,7 +8,7 @@ from datetime import datetime
 from src.db.s3 import upload_picture, delete_picture_by_object_name
 from src.db.dbInstance import dynamodb
 from src.custom_error import CustomException, ErrorCode
-from src.utils.string_utils import has_special_characters, has_script_tags
+from src.utils.string_utils import has_special_characters, has_script_tags, has_google_maps_url
 from src.utils.enum_types import UploadStatus
 
 # primary key is uuid
@@ -112,8 +112,11 @@ class ValidationError(TypedDict):
 def validate_create_omamori(omamori: OmamoriInput):
     validation_error = ValidationError(has_error=False)
 
-    validate_shrine_name(
-        shrine_name=omamori.shrine_name, validation_error=validation_error)
+    validate_shrine_name(shrine_name=omamori.shrine_name,
+                         validation_error=validation_error)
+
+    validate_google_url(google_url=omamori.google_maps_link,
+                        validation_error=validation_error)
 
     return validation_error
 
@@ -127,6 +130,20 @@ def validate_shrine_name(shrine_name: str, validation_error: ValidationError):
         validation_error["has_error"] = True
 
     if has_script_tags(shrine_name):
+        validation_error["has_error"] = True
+
+    return validation_error
+
+
+def validate_google_url(google_url: str, validation_error: ValidationError):
+    # browser urls are max 2000 charcters
+    if len(google_url) > 2000:
+        validation_error["has_error"] = True
+
+    if not has_google_maps_url(google_url):
+        validation_error["has_error"] = True
+
+    if has_script_tags(google_url):
         validation_error["has_error"] = True
 
     return validation_error
