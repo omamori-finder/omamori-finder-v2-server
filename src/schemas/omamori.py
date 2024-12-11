@@ -6,17 +6,6 @@ from src.utils.enum_types import PrefectureEnum, ShrineReligionEnum, ProtectionT
 # we needed to create a normal class
 
 
-class OmamoriInput(BaseModel):
-    shrine_name: str = Field(examples=['Meiji Jingu'])
-    google_maps_link: str = Field(
-        examples=['https://maps.app.goo.gl/RAAtiAsSBkA5X2UM6'])
-    prefecture: PrefectureEnum
-    protection_type: ProtectionTypeEnum
-    shrine_religion: ShrineReligionEnum
-    description: str | None = None
-    upload_status: UploadStatus | None = UploadStatus.NOT_STARTED
-
-
 class OmamoriOut(BaseModel):
     uuid: UUID4
     updated_at: datetime
@@ -25,3 +14,19 @@ class OmamoriOut(BaseModel):
 
 class OmamoriPictureOut(BaseModel):
     object_key: str
+
+
+class ShrineName(BaseModel):
+    name: str = Field(examples=['Meiji Jingu'])
+    local: str
+
+
+class OmamoriInput(BaseModel):
+    shrine_name: list[ShrineName]
+    google_maps_link: str = Field(
+        examples=['https://maps.app.goo.gl/RAAtiAsSBkA5X2UM6'])
+    prefecture: PrefectureEnum
+    protection_type: ProtectionTypeEnum
+    shrine_religion: ShrineReligionEnum
+    description: str | None = None
+    upload_status: UploadStatus | None = UploadStatus.NOT_STARTED
