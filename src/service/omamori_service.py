@@ -112,8 +112,11 @@ class ValidationError(TypedDict):
 def validate_create_omamori(omamori: OmamoriInput):
     validation_error = ValidationError(has_error=False)
 
-    validate_shrine_name(
-        shrine_name=omamori.shrine_name, validation_error=validation_error)
+    validate_shrine_name(shrine_name=omamori.shrine_name,
+                         validation_error=validation_error)
+
+    validate_google_url(google_url=omamori.google_maps_link,
+                        validation_error=validation_error)
 
     return validation_error
 
@@ -133,10 +136,14 @@ def validate_shrine_name(shrine_name: str, validation_error: ValidationError):
 
 
 def validate_google_url(google_url: str, validation_error: ValidationError):
+    # browser urls are max 2000 charcters
     if len(google_url) > 2000:
         validation_error["has_error"] = True
 
     if not has_google_maps_url(google_url):
+        validation_error["has_error"] = True
+
+    if has_script_tags(google_url):
         validation_error["has_error"] = True
 
     return validation_error
