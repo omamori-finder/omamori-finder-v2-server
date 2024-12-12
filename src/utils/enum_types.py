@@ -1,6 +1,11 @@
 from enum import Enum
 
 
+class LocaleEnum(str, Enum):
+    en_US = "en_US"
+    ja_JP = "ja_JP"
+
+
 class UploadStatus(str, Enum):
     NOT_STARTED = "NOT_STARTED"
     UPLOADING = "UPLOADING"

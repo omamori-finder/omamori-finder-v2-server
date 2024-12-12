@@ -1,15 +1,6 @@
 from pydantic import BaseModel, UUID4, Field
 from datetime import datetime
-from src.utils.enum_types import PrefectureEnum, ShrineReligionEnum, ProtectionTypeEnum, UploadStatus
-
-# Since we are using form data we are not able to use pydantic as input, that's why
-# we needed to create a normal class
-
-
-class OmamoriOut(BaseModel):
-    uuid: UUID4
-    updated_at: datetime
-    created_at: datetime
+from src.utils.enum_types import PrefectureEnum, ShrineReligionEnum, ProtectionTypeEnum, UploadStatus, LocaleEnum
 
 
 class OmamoriPictureOut(BaseModel):
@@ -18,7 +9,14 @@ class OmamoriPictureOut(BaseModel):
 
 class ShrineName(BaseModel):
     name: str = Field(examples=['Meiji Jingu'])
-    local: str
+    locale: LocaleEnum
+
+
+class OmamoriOut(BaseModel):
+    uuid: UUID4
+    shrine_name: list[ShrineName]
+    updated_at: datetime
+    created_at: datetime
 
 
 class OmamoriInput(BaseModel):
