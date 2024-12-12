@@ -3,7 +3,7 @@ import uuid
 from typing import TypedDict
 from fastapi import UploadFile
 from botocore.exceptions import ClientError, BotoCoreError
-from src.schemas.omamori import OmamoriInput
+from src.schemas.omamori import OmamoriInput, ShrineName
 from datetime import datetime
 from src.db.s3 import upload_picture, delete_picture_by_object_name
 from src.db.dbInstance import dynamodb
@@ -93,7 +93,7 @@ def map_request_to_db_entity(omamori: OmamoriInput):
     current_date = datetime.now().isoformat()
     return {
         "uuid": str(uuid.uuid4()),
-        "shrine_name": omamori.shrine_name,
+        "shrine_name":  [shrine.model_dump() for shrine in omamori.shrine_name],
         "google_maps_link": omamori.google_maps_link,
         "prefecture": omamori.prefecture,
         "description": omamori.description,
@@ -121,16 +121,17 @@ def validate_create_omamori(omamori: OmamoriInput):
     return validation_error
 
 
-def validate_shrine_name(shrine_name: str, validation_error: ValidationError):
+def validate_shrine_name(shrine_name: ShrineName, validation_error: ValidationError):
 
-    if len(shrine_name.strip()) < 1:
+    if len(shrine_name) < 1:
         validation_error["has_error"] = True
 
-    if has_special_characters(shrine_name):
-        validation_error["has_error"] = True
+    for name in shrine_name:
+        if has_special_characters(name.name):
+            validation_error["has_error"] = True
 
-    if has_script_tags(shrine_name):
-        validation_error["has_error"] = True
+        if has_script_tags(name.name):
+            validation_error["has_error"] = True
 
     return validation_error
 
