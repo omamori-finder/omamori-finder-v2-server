@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import TypedDict
 from fastapi import HTTPException, Request, FastAPI
 from fastapi.responses import JSONResponse
 
@@ -11,10 +12,15 @@ class ErrorCode(Enum):
     VALIDATION_ERROR = "VALIDATION_ERROR"
 
 
+class Error(TypedDict):
+    errors: list[dict]
+    error: ErrorCode
+    has_error: bool
+
+
 class CustomException(Exception):
-    def __init__(self, field: str, error_code: ErrorCode, status_code: int) -> None:
-        self.field = field
-        self.error_code = error_code
+    def __init__(self, error: list[Error], status_code: int) -> None:
+        self.error = error
         self.status_code = status_code
 
 
@@ -24,7 +30,6 @@ def add_custom_error(app: FastAPI):
         return JSONResponse(
             status_code=error.status_code,
             content={
-                "field": error.field,
-                "erroCode": error.error_code.value
+                "error": error.error
             }
         )
