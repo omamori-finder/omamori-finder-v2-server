@@ -31,3 +31,24 @@ def has_google_maps_url(string_value: str) -> bool:
         return False
 
     return True
+
+
+def has_japanese_characters(string_value: str) -> bool:
+    regex_japanese_characters = r"[\u3040-\u309f\u30a0-\u30ff\u4e00-\u9faf]+"
+    contains_japanese_characters = re.search(
+        regex_japanese_characters, string_value)
+
+    if contains_japanese_characters == None:
+        return False
+
+    return True
+
+
+def has_latin_characters(string_value: str) -> bool:
+    regex_latin_characters = r"[a-zA-Z]+"
+    contains_latin_characters = re.search(regex_latin_characters, string_value)
+
+    if contains_latin_characters is None:
+        return False
+
+    return True

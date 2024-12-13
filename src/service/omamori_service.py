@@ -8,8 +8,8 @@ from datetime import datetime
 from src.db.s3 import upload_picture, delete_picture_by_object_name
 from src.db.dbInstance import dynamodb
 from src.custom_error import CustomException, ErrorCode
-from src.utils.string_utils import has_special_characters, has_script_tags, has_google_maps_url
-from src.utils.enum_types import UploadStatus
+from src.utils.string_utils import has_special_characters, has_script_tags, has_google_maps_url, has_japanese_characters, has_latin_characters
+from src.utils.enum_types import UploadStatus, LocaleEnum
 
 # primary key is uuid
 
@@ -121,17 +121,28 @@ def validate_create_omamori(omamori: OmamoriInput):
     return validation_error
 
 
-def validate_shrine_name(shrine_name: ShrineName, validation_error: ValidationError):
+def validate_shrine_name(shrine_name: list[ShrineName], validation_error: ValidationError):
 
     if len(shrine_name) < 1:
         validation_error["has_error"] = True
 
     for name in shrine_name:
         if has_special_characters(name.name):
+            validation_error["fieds"].append({
+
+            })
             validation_error["has_error"] = True
 
         if has_script_tags(name.name):
             validation_error["has_error"] = True
+
+        if name.locale == LocaleEnum.en_US:
+            if has_japanese_characters(name.name):
+                validation_error["has_error"] = True
+
+        if name.locale == LocaleEnum.ja_JP:
+            if has_latin_characters(name.name):
+                validation_error["has_error"] = True
 
     return validation_error
 
