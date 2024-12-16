@@ -111,17 +111,13 @@ def map_request_to_db_entity(omamori: OmamoriInput):
     }
 
 
-class ValidationError(TypedDict):
-    has_error: bool
-
-
 def validate_create_omamori(omamori: OmamoriInput):
     validation_error = Error(
         errors=[],
         error=ErrorCode.VALIDATION_ERROR.value,
         has_error=False
     )
-    print("VALIDATION_ERROR", validation_error)
+
     validate_shrine_name(shrine_name=omamori.shrine_name,
                          validation_error=validation_error)
 
@@ -140,14 +136,14 @@ def validate_shrine_name(shrine_name: list[ShrineName], validation_error: Error)
         if has_special_characters(name.name):
             validation_error["errors"].append({
                 "field": "shrine_name",
-                "error_code": ErrorCode.VALIDATION_ERROR.value
+                "error_code": ErrorCode.CONTAINS_INVALID_CHARACTER.value
             })
             validation_error["has_error"] = True
 
         if has_script_tags(name.name):
             validation_error["errors"].append({
                 "field": "shrine_name",
-                "error_code": ErrorCode.VALIDATION_ERROR.value
+                "error_code": ErrorCode.CONTAINS_INVALID_CHARACTER.value
             })
             validation_error["has_error"] = True
 
@@ -155,7 +151,7 @@ def validate_shrine_name(shrine_name: list[ShrineName], validation_error: Error)
             if has_japanese_characters(name.name):
                 validation_error["errors"].append({
                     "field": "shrine_name",
-                    "error_code": ErrorCode.VALIDATION_ERROR.value
+                    "error_code": ErrorCode.CONTAINS_JAPANESE_CHARACTER.value
                 })
                 validation_error["has_error"] = True
 
@@ -163,22 +159,34 @@ def validate_shrine_name(shrine_name: list[ShrineName], validation_error: Error)
             if has_latin_characters(name.name):
                 validation_error["errors"].append({
                     "field": "shrine_name",
-                    "error_code": ErrorCode.VALIDATION_ERROR.value
+                    "error_code": ErrorCode.CONTAINS_LATIN_CHARACTER.value
                 })
                 validation_error["has_error"] = True
 
     return validation_error
 
 
-def validate_google_url(google_url: str, validation_error: ValidationError):
+def validate_google_url(google_url: str, validation_error: Error):
     # browser urls are max 2000 charcters
     if len(google_url) > 2000:
+        validation_error["errors"].append({
+            "field": "google_maps_link",
+            "error_code": ErrorCode.INVALID_LENGTH_TOO_LONG.value
+        })
         validation_error["has_error"] = True
 
     if not has_google_maps_url(google_url):
+        validation_error["errors"].append({
+            "field": "google_maps_link",
+            "error_code": ErrorCode.INVALID_GOOGLE_MAP_URL.value
+        })
         validation_error["has_error"] = True
 
     if has_script_tags(google_url):
+        validation_error["errors"].append({
+            "field": "google_maps_link",
+            "error_code": ErrorCode.CONTAINS_INVALID_CHARACTER.value
+        })
         validation_error["has_error"] = True
 
     return validation_error

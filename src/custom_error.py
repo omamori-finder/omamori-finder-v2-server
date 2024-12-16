@@ -10,6 +10,11 @@ class ErrorCode(Enum):
     REQUIRED = "REQUIRED"
     MISSING_INPUT = "MISSING_INPUT"
     VALIDATION_ERROR = "VALIDATION_ERROR"
+    CONTAINS_INVALID_CHARACTER = "CONTAINS_INVALID_CHARACTER"
+    CONTAINS_JAPANESE_CHARACTER = "CONTAINS_JAPANESE_CHARACTER"
+    CONTAINS_LATIN_CHARACTER = "CONTAINS_LATIN_CHARACTER"
+    INVALID_LENGTH_TOO_LONG = "INVALID_LENGTH_TOO_LONG"
+    INVALID_GOOGLE_MAP_URL = "INVALID_GOOGLE_MAP_URL"
 
 
 class Error(TypedDict):
@@ -29,7 +34,5 @@ def add_custom_error(app: FastAPI):
     async def custom_error(request: Request, error: CustomException):
         return JSONResponse(
             status_code=error.status_code,
-            content={
-                "error": error.error
-            }
+            content=error.error
         )
