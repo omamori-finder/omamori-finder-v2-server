@@ -23,10 +23,10 @@ def upload_picture(img_file: UploadFile, bucket='omamori-finder-pictures-develop
             error={
                 "errors": [
                     {
-                        "field": "upload_picture"
+                        "field": "upload_picture",
+                        "error_code": ErrorCode.SERVER_ERROR.value,
                     }
                 ],
-                "error": ErrorCode.SERVER_ERROR.value,
                 "has_error": True
             },
             status_code=500

@@ -1,13 +1,12 @@
 import logging
 import uuid
-from typing import TypedDict
 from fastapi import UploadFile
 from botocore.exceptions import ClientError, BotoCoreError
 from src.schemas.omamori import OmamoriInput, ShrineName
 from datetime import datetime
 from src.db.s3 import upload_picture, delete_picture_by_object_name
 from src.db.dbInstance import dynamodb
-from src.custom_error import CustomException, ErrorCode, Error
+from src.custom_error import CustomException, ErrorCode, ErrorResponse
 from src.utils.string_utils import has_special_characters, has_script_tags, has_google_maps_url, has_japanese_characters, has_latin_characters
 from src.utils.enum_types import UploadStatus, LocaleEnum
 
@@ -38,12 +37,16 @@ def create_omamori(omamori: OmamoriInput):
             err.response["Error"]["Code"],
             err.response["Error"]["Message"],
         )
-        raise CustomException(error=[{
-            "field": "create_omamori",
-            "error_code": ErrorCode.SERVER_ERROR.value,
-            "has_error": True
-        }],
-
+        raise CustomException(
+            error={
+                "errors": [
+                    {
+                        "field": "create_omamori",
+                        "error_code": ErrorCode.SERVER_ERROR.value,
+                    }
+                ],
+                "has_error": True
+            },
             status_code=500
         )
 
@@ -91,8 +94,19 @@ def upload_omamori_picture(img_file: UploadFile, uuid: str):
                           err,
                           "Deleted the picture in the S3 bucket as response",
                           deleted_picture)
-            raise CustomException(field="Upload_omamori_picture",
-                                  error_code=ErrorCode.SERVER_ERROR, status_code=500)
+
+            raise CustomException(
+                error={
+                    "errors": [
+                        {
+                            "field": "upload_omamori_picture",
+                            "error_code": ErrorCode.SERVER_ERROR.value,
+                        }
+                    ],
+                    "has_error": True
+                },
+                status_code=500
+            )
 
 
 def map_request_to_db_entity(omamori: OmamoriInput):
@@ -112,9 +126,8 @@ def map_request_to_db_entity(omamori: OmamoriInput):
 
 
 def validate_create_omamori(omamori: OmamoriInput):
-    validation_error = Error(
+    validation_error = ErrorResponse(
         errors=[],
-        error=ErrorCode.VALIDATION_ERROR.value,
         has_error=False
     )
 
@@ -127,7 +140,7 @@ def validate_create_omamori(omamori: OmamoriInput):
     return validation_error
 
 
-def validate_shrine_name(shrine_name: list[ShrineName], validation_error: Error):
+def validate_shrine_name(shrine_name: list[ShrineName], validation_error: ErrorResponse):
 
     if len(shrine_name) < 1:
         validation_error["has_error"] = True
@@ -166,7 +179,7 @@ def validate_shrine_name(shrine_name: list[ShrineName], validation_error: Error)
     return validation_error
 
 
-def validate_google_url(google_url: str, validation_error: Error):
+def validate_google_url(google_url: str, validation_error: ErrorResponse):
     # browser urls are max 2000 charcters
     if len(google_url) > 2000:
         validation_error["errors"].append({

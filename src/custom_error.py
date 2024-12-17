@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import TypedDict
-from fastapi import HTTPException, Request, FastAPI
+from fastapi import Request, FastAPI
 from fastapi.responses import JSONResponse
 
 
@@ -17,14 +17,18 @@ class ErrorCode(Enum):
     INVALID_GOOGLE_MAP_URL = "INVALID_GOOGLE_MAP_URL"
 
 
-class Error(TypedDict):
-    errors: list[dict]
-    error: ErrorCode
+class ErrorFieldDetail(TypedDict):
+    field: str
+    error_code: ErrorCode
+
+
+class ErrorResponse(TypedDict):
+    errors: list[ErrorFieldDetail]
     has_error: bool
 
 
 class CustomException(Exception):
-    def __init__(self, error: list[Error], status_code: int) -> None:
+    def __init__(self, error: ErrorResponse, status_code: int) -> None:
         self.error = error
         self.status_code = status_code
 
