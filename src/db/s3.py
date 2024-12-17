@@ -19,8 +19,18 @@ def upload_picture(img_file: UploadFile, bucket='omamori-finder-pictures-develop
         logging.error("Was not able to upload the picture to S3 bucket",
                       "Here is why",
                       err)
-        raise CustomException(field="upload_picture",
-                              error_code=ErrorCode.SERVER_ERROR, status_code=500)
+        raise CustomException(
+            error={
+                "errors": [
+                    {
+                        "field": "upload_picture",
+                        "error_code": ErrorCode.SERVER_ERROR.value,
+                    }
+                ],
+                "has_error": True
+            },
+            status_code=500
+        )
 
 
 def delete_picture_by_object_name(object_name: str):

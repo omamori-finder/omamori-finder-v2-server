@@ -1,13 +1,12 @@
 import logging
 import uuid
-from typing import TypedDict
 from fastapi import UploadFile
 from botocore.exceptions import ClientError, BotoCoreError
 from src.schemas.omamori import OmamoriInput, ShrineName
 from datetime import datetime
 from src.db.s3 import upload_picture, delete_picture_by_object_name
 from src.db.dbInstance import dynamodb
-from src.custom_error import CustomException, ErrorCode
+from src.custom_error import CustomException, ErrorCode, ErrorResponse
 from src.utils.string_utils import has_special_characters, has_script_tags, has_google_maps_url, has_japanese_characters, has_latin_characters
 from src.utils.enum_types import UploadStatus, LocaleEnum
 
@@ -22,7 +21,9 @@ def create_omamori(omamori: OmamoriInput):
 
         if validation_error["has_error"]:
             raise CustomException(
-                field="create_omamori", error_code=ErrorCode.VALIDATION_ERROR, status_code=402)
+                error=validation_error,
+                status_code=402
+            )
 
         db_entity = map_request_to_db_entity(omamori=omamori)
 
@@ -36,10 +37,18 @@ def create_omamori(omamori: OmamoriInput):
             err.response["Error"]["Code"],
             err.response["Error"]["Message"],
         )
-        raise CustomException(field="create_omamori",
-                              error_code=ErrorCode.SERVER_ERROR,
-                              status_code=500
-                              )
+        raise CustomException(
+            error={
+                "errors": [
+                    {
+                        "field": "create_omamori",
+                        "error_code": ErrorCode.SERVER_ERROR.value,
+                    }
+                ],
+                "has_error": True
+            },
+            status_code=500
+        )
 
 
 def upload_omamori_picture(img_file: UploadFile, uuid: str):
@@ -85,8 +94,19 @@ def upload_omamori_picture(img_file: UploadFile, uuid: str):
                           err,
                           "Deleted the picture in the S3 bucket as response",
                           deleted_picture)
-            raise CustomException(field="Upload_omamori_picture",
-                                  error_code=ErrorCode.SERVER_ERROR, status_code=500)
+
+            raise CustomException(
+                error={
+                    "errors": [
+                        {
+                            "field": "upload_omamori_picture",
+                            "error_code": ErrorCode.SERVER_ERROR.value,
+                        }
+                    ],
+                    "has_error": True
+                },
+                status_code=500
+            )
 
 
 def map_request_to_db_entity(omamori: OmamoriInput):
@@ -105,12 +125,11 @@ def map_request_to_db_entity(omamori: OmamoriInput):
     }
 
 
-class ValidationError(TypedDict):
-    has_error: bool
-
-
 def validate_create_omamori(omamori: OmamoriInput):
-    validation_error = ValidationError(has_error=False)
+    validation_error = ErrorResponse(
+        errors=[],
+        has_error=False
+    )
 
     validate_shrine_name(shrine_name=omamori.shrine_name,
                          validation_error=validation_error)
@@ -121,41 +140,66 @@ def validate_create_omamori(omamori: OmamoriInput):
     return validation_error
 
 
-def validate_shrine_name(shrine_name: list[ShrineName], validation_error: ValidationError):
+def validate_shrine_name(shrine_name: list[ShrineName], validation_error: ErrorResponse):
 
     if len(shrine_name) < 1:
         validation_error["has_error"] = True
 
     for name in shrine_name:
         if has_special_characters(name.name):
-            validation_error["fieds"].append({
-
+            validation_error["errors"].append({
+                "field": "shrine_name",
+                "error_code": ErrorCode.CONTAINS_INVALID_CHARACTER.value
             })
             validation_error["has_error"] = True
 
         if has_script_tags(name.name):
+            validation_error["errors"].append({
+                "field": "shrine_name",
+                "error_code": ErrorCode.CONTAINS_INVALID_CHARACTER.value
+            })
             validation_error["has_error"] = True
 
         if name.locale == LocaleEnum.en_US:
             if has_japanese_characters(name.name):
+                validation_error["errors"].append({
+                    "field": "shrine_name",
+                    "error_code": ErrorCode.CONTAINS_JAPANESE_CHARACTER.value
+                })
                 validation_error["has_error"] = True
 
         if name.locale == LocaleEnum.ja_JP:
             if has_latin_characters(name.name):
+                validation_error["errors"].append({
+                    "field": "shrine_name",
+                    "error_code": ErrorCode.CONTAINS_LATIN_CHARACTER.value
+                })
                 validation_error["has_error"] = True
 
     return validation_error
 
 
-def validate_google_url(google_url: str, validation_error: ValidationError):
+def validate_google_url(google_url: str, validation_error: ErrorResponse):
     # browser urls are max 2000 charcters
     if len(google_url) > 2000:
+        validation_error["errors"].append({
+            "field": "google_maps_link",
+            "error_code": ErrorCode.INVALID_LENGTH_TOO_LONG.value
+        })
         validation_error["has_error"] = True
 
     if not has_google_maps_url(google_url):
+        validation_error["errors"].append({
+            "field": "google_maps_link",
+            "error_code": ErrorCode.INVALID_GOOGLE_MAP_URL.value
+        })
         validation_error["has_error"] = True
 
     if has_script_tags(google_url):
+        validation_error["errors"].append({
+            "field": "google_maps_link",
+            "error_code": ErrorCode.CONTAINS_INVALID_CHARACTER.value
+        })
         validation_error["has_error"] = True
 
     return validation_error
