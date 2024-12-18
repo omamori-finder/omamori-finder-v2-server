@@ -53,7 +53,8 @@ def create_omamori(omamori: OmamoriInput):
 
 def upload_omamori_picture(img_file: UploadFile, uuid: str):
     try:
-        uploaded_picture_data = upload_picture(img_file)
+        # TO DO: Before we even attempt to upload a picture we need to check if this uui (omamori) even exist.
+        uploaded_picture_data: dict = upload_picture(img_file)
 
         update_expression = "SET #upload_status = :upload_status, #picture_path = :picture_path, #updated_at = :updated_at"
 
@@ -85,7 +86,7 @@ def upload_omamori_picture(img_file: UploadFile, uuid: str):
 
         if ClientError or BotoCoreError:
             deleted_picture = delete_picture_by_object_name(
-                object_name=uploaded_picture_data)
+                object_names=uploaded_picture_data)
 
             # TO DO: What to do if the picture was not deleted?
 
