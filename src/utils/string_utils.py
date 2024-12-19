@@ -6,7 +6,7 @@ def has_special_characters(string_value: str) -> bool:
     contains_invalid_character = re.search(
         regex_special_characters, string_value)
 
-    if contains_invalid_character != None:
+    if contains_invalid_character is not None:
         return True
 
     return False
@@ -17,17 +17,20 @@ def has_script_tags(string_value: str) -> bool:
     contains_script_tags = re.search(
         regex_script_tags, string_value, re.IGNORECASE)
 
-    if contains_script_tags != None:
+    if contains_script_tags is not None:
         return True
 
     return False
 
 
 def has_google_maps_url(string_value: str) -> bool:
-    regex_google_maps_url = r"^(https?):\/\/(maps\.app\.goo\.gl\b|(www\.)?google\.com/maps)/"
-    contains_google_maps_url = re.search(regex_google_maps_url, string_value)
+    regex_google_maps_url = r"""
+        ^(https?):\/\/(maps\.app\.goo\.gl\b|(www\.)?google\.com/maps)/
+    """
+    contains_google_maps_url = re.search(
+        regex_google_maps_url, string_value, re.VERBOSE)
 
-    if contains_google_maps_url == None:
+    if contains_google_maps_url is None:
         return False
 
     return True
@@ -38,7 +41,7 @@ def has_japanese_characters(string_value: str) -> bool:
     contains_japanese_characters = re.search(
         regex_japanese_characters, string_value)
 
-    if contains_japanese_characters == None:
+    if contains_japanese_characters is None:
         return False
 
     return True

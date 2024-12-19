@@ -12,7 +12,7 @@ ifeq ($(OS), Windows_NT)
 	PY=py
 endif
 
-.PHONY: venv activate clean build
+.PHONY: venv activate clean build lint
 # Create virtual environment
 venv: $(VENV)
 
@@ -49,6 +49,9 @@ activate: venv
 # Clean up virtual environment and any other generated files
 clean:
 	rm -rf ./$(VENV)
+
+lint:
+	flake8 src/.
 
 # Generate requirements.txt from installed packages
 freeze: venv
