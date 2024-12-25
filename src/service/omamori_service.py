@@ -7,7 +7,13 @@ from datetime import datetime
 from src.db.s3 import upload_picture, delete_picture_by_object_name
 from src.db.dbInstance import dynamodb
 from src.custom_error import CustomException, ErrorCode, ErrorResponse
-from src.utils.string_utils import has_special_characters, has_script_tags, has_google_maps_url, has_japanese_characters, has_latin_characters
+from src.utils.string_utils import (
+    has_special_characters,
+    has_script_tags,
+    has_google_maps_url,
+    has_japanese_characters,
+    has_latin_characters
+)
 from src.utils.enum_types import UploadStatus, LocaleEnum
 
 # primary key is uuid
@@ -53,10 +59,16 @@ def create_omamori(omamori: OmamoriInput):
 
 def upload_omamori_picture(img_file: UploadFile, uuid: str):
     try:
-        # TO DO: Before we even attempt to upload a picture we need to check if this uui (omamori) even exist.
+        # TO DO: Before we even attempt to upload a picture,
+        # we need to check if this uui (omamori) even exist.
         uploaded_picture_data: dict = upload_picture(img_file)
 
-        update_expression = "SET #upload_status = :upload_status, #picture_path = :picture_path, #updated_at = :updated_at"
+        update_expression = (
+            "SET"
+            "#upload_status = :upload_status,"
+            "#picture_path = :picture_path,"
+            "#updated_at = :updated_at"
+        )
 
         expression_attribute_names = {
             "#upload_status": "upload_status",
@@ -114,7 +126,9 @@ def map_request_to_db_entity(omamori: OmamoriInput):
     current_date = datetime.now().isoformat()
     return {
         "uuid": str(uuid.uuid4()),
-        "shrine_name":  [shrine.model_dump() for shrine in omamori.shrine_name],
+        "shrine_name":  [
+            shrine.model_dump() for shrine in omamori.shrine_name
+        ],
         "google_maps_link": omamori.google_maps_link,
         "prefecture": omamori.prefecture,
         "description": omamori.description,
@@ -132,16 +146,22 @@ def validate_create_omamori(omamori: OmamoriInput):
         has_error=False
     )
 
-    validate_shrine_name(shrine_name=omamori.shrine_name,
-                         validation_error=validation_error)
+    validate_shrine_name(
+        shrine_name=omamori.shrine_name,
+        validation_error=validation_error
+    )
 
-    validate_google_url(google_url=omamori.google_maps_link,
-                        validation_error=validation_error)
+    validate_google_url(
+        google_url=omamori.google_maps_link,
+        validation_error=validation_error
+    )
 
     return validation_error
 
 
-def validate_shrine_name(shrine_name: list[ShrineName], validation_error: ErrorResponse):
+def validate_shrine_name(
+        shrine_name: list[ShrineName],
+        validation_error: ErrorResponse):
 
     if len(shrine_name) < 1:
         validation_error["has_error"] = True

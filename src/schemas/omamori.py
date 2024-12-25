@@ -1,6 +1,12 @@
 from pydantic import BaseModel, UUID4, Field
 from datetime import datetime
-from src.utils.enum_types import PrefectureEnum, ShrineReligionEnum, ProtectionTypeEnum, UploadStatus, LocaleEnum
+from src.utils.enum_types import (
+    PrefectureEnum,
+    ShrineReligionEnum,
+    ProtectionTypeEnum,
+    UploadStatus,
+    LocaleEnum
+)
 
 
 class OmamoriPictureOut(BaseModel):
