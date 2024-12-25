@@ -1,5 +1,5 @@
 name: Lint
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+run-name: Running Linting on your code...🚀
 on: 
     push: 
         branches:
@@ -14,13 +14,24 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install --requirement requirements.txt --no-cache-dir
       - name: Run linting
         run: flake8 src/.
+
+      - name: Linting Failed
+        if: failure()
+        run: |
+          echo "❌ Linting failed! Please fix the errors and try again."
+          
+      - name: Linting Passed
+        if: success()
+        run: echo "✅ Linting completed successfully!"
