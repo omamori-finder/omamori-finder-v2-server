@@ -27,6 +27,8 @@ class ProtectionTypeEnum(str, Enum):
     health = "health"
     success = "success"
     family = "family"
+    pregnancy = "pregnancy"
+    safe_birth = "safe birth"
 
 
 class PrefectureEnum(str, Enum):
