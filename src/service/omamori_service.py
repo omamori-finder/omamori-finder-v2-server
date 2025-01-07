@@ -59,8 +59,26 @@ def create_omamori(omamori: OmamoriInput):
 
 def upload_omamori_picture(img_file: UploadFile, uuid: str):
     try:
-        # TO DO: Before we even attempt to upload a picture,
-        # we need to check if this uui (omamori) even exist.
+        existing_omamori = omamori_table.get_item(
+            Key={
+                "uuid": uuid
+            }
+        )
+
+        if "Item" not in existing_omamori:
+            raise CustomException(
+                error={
+                    "errors": [
+                        {
+                            "field": "upload_omamori_picture",
+                            "error_code": ErrorCode.OMAMORI_NOT_FOUND.value,
+                        }
+                    ],
+                    "has_error": True
+                },
+                status_code=400
+            )
+
         uploaded_picture_data: dict = upload_picture(img_file)
 
         update_expression = (
