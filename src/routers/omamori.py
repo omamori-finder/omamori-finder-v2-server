@@ -2,12 +2,18 @@ import logging
 import src.service.omamori_service as service
 from fastapi import APIRouter, UploadFile, Form
 from src.schemas.omamori import OmamoriOut, OmamoriInput
+from src.utils.enum_types import PrefectureEnum, ProtectionTypeEnum, ShrineReligionEnum
 
 router = APIRouter()
 
 
-@router.get("/omamori")
-async def get_omamori():
+@router.get("/omamori/")
+async def get_omamori(
+    prefecture: PrefectureEnum | None = None,
+    protection: ProtectionTypeEnum | None = None,
+    religion: ShrineReligionEnum | None = None
+):
+    print("Filters are", prefecture, protection, religion)
     return {"Here are some omamori 🎏"}
 
 
