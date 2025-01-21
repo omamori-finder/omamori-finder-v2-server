@@ -40,8 +40,18 @@ createtable:
 	@echo "Creating table in dynamodb"
 	AWS_ACCESS_KEY_ID=X AWS_SECRET_ACCESS_KEY=X aws dynamodb create-table \
 	--endpoint-url http://localhost:8000 \
-	--table-name omamori --attribute-definitions AttributeName=uuid,AttributeType=S \
-	--key-schema AttributeName=uuid,KeyType=HASH --billing-mode PAY_PER_REQUEST  --region localhost
+	--table-name omamori \
+	--attribute-definitions \
+		AttributeName=uuid,AttributeType=S \
+		AttributeName=prefecture,AttributeType=S \
+		AttributeName=protection_type,AttributeType=S \
+		AttributeName=shrine_religion,AttributeType=S \
+	--key-schema \
+		AttributeName=uuid,KeyType=HASH \
+		AttributeName=prefecture,KeyType=RANGE \
+	--global-secondary-indexes \
+		'[{"IndexName": "prefecture_index","KeySchema": [{"AttributeName": "prefecture", "KeyType": "HASH"},{"AttributeName": "protection_type", "KeyType": "RANGE"}],"Projection": {"ProjectionType": "ALL"},"ProvisionedThroughput": {"ReadCapacityUnits": 10,"WriteCapacityUnits": 5}}]' \
+	--billing-mode PAY_PER_REQUEST --region localhost
 
 activate: venv
 	$(BIN)

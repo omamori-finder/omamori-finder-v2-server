@@ -13,8 +13,8 @@ async def get_omamori(
     protection: ProtectionTypeEnum | None = None,
     religion: ShrineReligionEnum | None = None
 ):
-    print("Filters are", prefecture, protection, religion)
-    return {"Here are some omamori 🎏"}
+    omamoris_by_prefecture = service.get_omamori(prefecture=prefecture)
+    return omamoris_by_prefecture
 
 
 @router.post("/omamori")

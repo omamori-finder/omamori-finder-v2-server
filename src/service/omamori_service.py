@@ -2,6 +2,7 @@ import logging
 import uuid
 from fastapi import UploadFile
 from botocore.exceptions import ClientError, BotoCoreError
+from boto3.dynamodb.conditions import Key
 from src.schemas.omamori import OmamoriInput, ShrineName
 from datetime import datetime
 from src.db.s3 import upload_picture, delete_picture_by_object_name
@@ -19,6 +20,19 @@ from src.utils.enum_types import UploadStatus, LocaleEnum
 # primary key is uuid
 
 omamori_table = dynamodb.Table("omamori")
+
+
+def get_omamori(prefecture: str):
+    try:
+        items_by_prefecture = omamori_table.query(
+            IndexName="prefecture_index",
+            Select="ALL_ATTRIBUTES",
+            KeyConditionExpression=Key("prefecture").eq(prefecture)
+        )
+        return items_by_prefecture["Items"]
+    except Exception as e:
+        print(f"Could not find items: {str(e)}")
+        return None
 
 
 def create_omamori(omamori: OmamoriInput):
