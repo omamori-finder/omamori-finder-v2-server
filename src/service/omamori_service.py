@@ -17,17 +17,22 @@ from src.utils.string_utils import (
 )
 from src.utils.enum_types import UploadStatus, LocaleEnum
 
-# primary key is uuid
-
-omamori_table = dynamodb.Table("omamori")
+omamori_table = dynamodb.Table("omamori_data")
 
 
-def get_omamori(prefecture: str):
+def get_omamori(prefecture: str, protection: str):
     try:
+        expression_attributes_values = ""
+
+        if prefecture:
+            expression_attributes_values = {
+                ":prefecture_val": prefecture.value
+            }
+
         items_by_prefecture = omamori_table.query(
             IndexName="prefecture_index",
-            Select="ALL_ATTRIBUTES",
-            KeyConditionExpression=Key("prefecture").eq(prefecture)
+            KeyConditionExpression="prefecture = :prefecture_val",
+            ExpressionAttributeValues=expression_attributes_values
         )
         return items_by_prefecture["Items"]
     except Exception as e:

@@ -11,9 +11,9 @@ router = APIRouter()
 async def get_omamori(
     prefecture: PrefectureEnum | None = None,
     protection: ProtectionTypeEnum | None = None,
-    religion: ShrineReligionEnum | None = None
 ):
-    omamoris_by_prefecture = service.get_omamori(prefecture=prefecture)
+    omamoris_by_prefecture = service.get_omamori(
+        prefecture=prefecture, protection=protection)
     return omamoris_by_prefecture
 
 
