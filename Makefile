@@ -37,22 +37,13 @@ stopcontainer:
 	docker compose down
 
 createtable:
-	@echo "Creating table in dynamodb"
+	@echo "👷Creating table in dynamodb👷"
 	AWS_ACCESS_KEY_ID=X AWS_SECRET_ACCESS_KEY=X aws dynamodb create-table \
-	--endpoint-url http://localhost:8000 \
-	--table-name omamori \
-	--attribute-definitions \
-		AttributeName=uuid,AttributeType=S \
-		AttributeName=prefecture,AttributeType=S \
-		AttributeName=protection_type,AttributeType=S \
-		AttributeName=shrine_religion,AttributeType=S \
-	--key-schema \
-		AttributeName=uuid,KeyType=HASH \
-		AttributeName=prefecture,KeyType=RANGE \
-	--global-secondary-indexes \
-		'[{"IndexName": "prefecture_index","KeySchema": [{"AttributeName": "prefecture", "KeyType": "HASH"},{"AttributeName": "protection_type", "KeyType": "RANGE"}],"Projection": {"ProjectionType": "ALL"},"ProvisionedThroughput": {"ReadCapacityUnits": 10,"WriteCapacityUnits": 5}}]' \
-	--billing-mode PAY_PER_REQUEST --region localhost
+	--cli-input-json file://omamori_table_definition.json \
+	--region localhost \
+	--endpoint-url http://localhost:8000
 
+# {"AttributeName": "protection_type", "KeyType": "RANGE"} needs be a sort key so It need to be unique
 activate: venv
 	$(BIN)
 

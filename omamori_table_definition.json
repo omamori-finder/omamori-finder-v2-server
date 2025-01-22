@@ -1,0 +1,51 @@
+{
+    "TableName": "omamori_data",
+    "KeySchema": [ 
+       { 
+          "AttributeName": "uuid",
+          "KeyType": "HASH"
+       },
+       { 
+          "AttributeName": "prefecture",
+          "KeyType": "RANGE"
+       }
+    ],
+    "AttributeDefinitions": [ 
+        { 
+            "AttributeName": "uuid",
+            "AttributeType": "S"
+        },
+        { 
+            "AttributeName": "prefecture",
+            "AttributeType": "S"
+        }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "GlobalSecondaryIndexes": [ 
+       { 
+          "IndexName": "prefecture_index",
+          "KeySchema": [ 
+             { 
+                "AttributeName": "prefecture",
+                "KeyType": "HASH"
+             },
+             { 
+                "AttributeName": "uuid",
+                "KeyType": "RANGE"
+             }
+          ],
+          "Projection": { 
+             "NonKeyAttributes": [
+                "protection_type",
+                "google_maps_link",
+                "description",
+                "shrine_name",
+                "shrine_religion",
+                "picture_path"
+              ],
+             "ProjectionType": "INCLUDE"
+          }
+       }
+    ]
+ }
+ 
