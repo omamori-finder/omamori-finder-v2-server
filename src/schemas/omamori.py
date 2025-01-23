@@ -34,3 +34,7 @@ class OmamoriInput(BaseModel):
     shrine_religion: ShrineReligionEnum
     description: str | None = None
     upload_status: UploadStatus | None = UploadStatus.NOT_STARTED
+
+
+class OmamoriSearchResults(OmamoriInput):
+    _upload_status: UploadStatus | None = UploadStatus.NOT_STARTED
