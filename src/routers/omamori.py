@@ -2,7 +2,7 @@ import logging
 import src.service.omamori_service as service
 from fastapi import APIRouter, UploadFile, Form
 from src.schemas.omamori import OmamoriOut, OmamoriInput, OmamoriSearchResults
-from src.utils.enum_types import PrefectureEnum, ProtectionTypeEnum, ShrineReligionEnum
+from src.utils.enum_types import PrefectureEnum, ProtectionTypeEnum
 
 router = APIRouter()
 

@@ -2,7 +2,6 @@ import logging
 import uuid
 from fastapi import UploadFile
 from botocore.exceptions import ClientError, BotoCoreError
-from boto3.dynamodb.conditions import Key
 from src.schemas.omamori import OmamoriInput, ShrineName, OmamoriSearchResults
 from datetime import datetime
 from src.db.s3 import upload_picture, delete_picture_by_object_name
