@@ -2,7 +2,7 @@ import logging
 import uuid
 from fastapi import UploadFile
 from botocore.exceptions import ClientError, BotoCoreError
-from src.schemas.omamori import OmamoriInput, ShrineName
+from src.schemas.omamori import OmamoriInput, ShrineName, OmamoriSearchResults
 from datetime import datetime
 from src.db.s3 import upload_picture, delete_picture_by_object_name
 from src.db.dbInstance import dynamodb
@@ -15,10 +15,64 @@ from src.utils.string_utils import (
     has_latin_characters
 )
 from src.utils.enum_types import UploadStatus, LocaleEnum
+from src.utils.enum_types import PrefectureEnum, ProtectionTypeEnum
 
-# primary key is uuid
 
-omamori_table = dynamodb.Table("omamori")
+OMAMORI_TABLE = dynamodb.Table("omamori_data")
+
+
+def search_omamori(
+    prefecture: PrefectureEnum | None,
+    protection: ProtectionTypeEnum | None
+) -> list[OmamoriSearchResults]:
+    try:
+        omamori_search_result = {}
+
+        if prefecture:
+            expression_attributes_values = {
+                ":prefecture_val": prefecture.value,
+            }
+
+            omamori_search_result = OMAMORI_TABLE.query(
+                IndexName="prefecture_index",
+                KeyConditionExpression="prefecture = :prefecture_val",
+                ExpressionAttributeValues=expression_attributes_values,
+            )
+
+        if prefecture and protection:
+            expression_attributes_values = {
+                ":prefecture_val": prefecture.value,
+                ":protection_val": protection.value
+            }
+
+            omamori_search_result = OMAMORI_TABLE.query(
+                IndexName="prefecture_index",
+                KeyConditionExpression="prefecture = :prefecture_val",
+                FilterExpression="protection_type = :protection_val",
+                ExpressionAttributeValues=expression_attributes_values,
+            )
+
+        return omamori_search_result["Items"]
+    except (ClientError) as err:
+        if ClientError:
+            logging.error(
+                "Couldn't retrieve omamori",
+                "Here's why", err
+
+            )
+
+            raise CustomException(
+                error={
+                    "errors": [
+                        {
+                            "field": "search_omamori",
+                            "error_code": ErrorCode.SERVER_ERROR.value,
+                        }
+                    ],
+                    "has_error": True
+                },
+                status_code=500
+            )
 
 
 def create_omamori(omamori: OmamoriInput):
@@ -33,7 +87,7 @@ def create_omamori(omamori: OmamoriInput):
 
         db_entity = map_request_to_db_entity(omamori=omamori)
 
-        omamori_table.put_item(Item=db_entity)
+        OMAMORI_TABLE.put_item(Item=db_entity)
         # TO DO: on succesful creation log "omamori is succesful created"
         return db_entity
     except ClientError as err:
@@ -59,7 +113,7 @@ def create_omamori(omamori: OmamoriInput):
 
 def upload_omamori_picture(img_file: UploadFile, uuid: str):
     try:
-        existing_omamori = omamori_table.get_item(
+        existing_omamori = OMAMORI_TABLE.get_item(
             Key={
                 "uuid": uuid
             }
@@ -100,7 +154,7 @@ def upload_omamori_picture(img_file: UploadFile, uuid: str):
             ":updated_at": datetime.now().isoformat()
         }
 
-        updated_omamori = omamori_table.update_item(
+        updated_omamori = OMAMORI_TABLE.update_item(
             Key={
                 "uuid": uuid
             },

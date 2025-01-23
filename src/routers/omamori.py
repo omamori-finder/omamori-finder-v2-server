@@ -1,14 +1,20 @@
 import logging
 import src.service.omamori_service as service
 from fastapi import APIRouter, UploadFile, Form
-from src.schemas.omamori import OmamoriOut, OmamoriInput
+from src.schemas.omamori import OmamoriOut, OmamoriInput, OmamoriSearchResults
+from src.utils.enum_types import PrefectureEnum, ProtectionTypeEnum
 
 router = APIRouter()
 
 
-@router.get("/omamori")
-async def get_omamori():
-    return {"Here are some omamori 🎏"}
+@router.get("/omamori/")
+async def search_omamori(
+    prefecture: PrefectureEnum | None = None,
+    protection: ProtectionTypeEnum | None = None,
+) -> list[OmamoriSearchResults]:
+    omamoris_by_prefecture = service.search_omamori(
+        prefecture=prefecture, protection=protection)
+    return omamoris_by_prefecture
 
 
 @router.post("/omamori")
