@@ -7,6 +7,8 @@
 1. Open Docker Desktop.
 
 2. To run the server in development, we use a Docker container. Before running the container, set your AWS credentials as environment variables.
+  
+  ❗You can run the server without setting the credentials, but you won’t be able to upload or retrieve pictures.❗
 
    In a `bash` terminal, run the following `export` commands (found under _Option 1: Set AWS environment variables_) after logging in through the access portal:
 
