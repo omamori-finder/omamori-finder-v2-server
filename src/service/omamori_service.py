@@ -23,8 +23,9 @@ OMAMORI_TABLE = dynamodb.Table("omamori_data")
 
 def search_omamori(
     prefecture: PrefectureEnum | None,
-    protection: ProtectionTypeEnum | None
-) -> list[OmamoriSearchResults]:
+    protection: ProtectionTypeEnum | None,
+    limit: int
+) -> OmamoriSearchResults:
     try:
         omamori_search_result = {}
 
@@ -37,6 +38,7 @@ def search_omamori(
                 IndexName="prefecture_index",
                 KeyConditionExpression="prefecture = :prefecture_val",
                 ExpressionAttributeValues=expression_attributes_values,
+                Limit=limit
             )
 
         if prefecture and protection:
@@ -50,9 +52,16 @@ def search_omamori(
                 KeyConditionExpression="prefecture = :prefecture_val",
                 FilterExpression="protection_type = :protection_val",
                 ExpressionAttributeValues=expression_attributes_values,
+                Limit=limit
             )
 
-        return omamori_search_result["Items"]
+        last_evaluated_item = omamori_search_result.get("LastEvaluatedKey", {})
+
+        return {
+            "omamoris": omamori_search_result["Items"],
+            "last_evaluated_item": last_evaluated_item
+        }
+
     except (ClientError) as err:
         if ClientError:
             logging.error(
