@@ -25,8 +25,8 @@ def search_omamori(
     prefecture: PrefectureEnum | None,
     protection: ProtectionTypeEnum | None,
     limit: int,
-    primary_start_key: str,
-    sort_start_key: str
+    prefecture_start_key: str,
+    uuid_start_key: str
 ) -> OmamoriSearchResults:
     try:
 
@@ -38,10 +38,10 @@ def search_omamori(
             "ExpressionAttributeValues": expression_attributes_values,
         }
 
-        if primary_start_key and sort_start_key:
+        if prefecture_start_key and uuid_start_key:
             query_start_key = {
-                "prefecture": primary_start_key,
-                "uuid": sort_start_key
+                "prefecture": prefecture_start_key,
+                "uuid": uuid_start_key
             }
             search_query["ExclusiveStartKey"] = query_start_key
 
