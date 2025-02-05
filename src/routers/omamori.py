@@ -6,15 +6,24 @@ from src.utils.enum_types import PrefectureEnum, ProtectionTypeEnum
 
 router = APIRouter()
 
+# -> OmamoriSearchResults
+
 
 @router.get("/omamori/")
 async def search_omamori(
     prefecture: PrefectureEnum | None = None,
     protection: ProtectionTypeEnum | None = None,
-    limit: int | None = 20
-) -> OmamoriSearchResults:
+    limit: int | None = 20,
+    primary_start_key: str | None = None,
+    sort_start_key: str | None = None
+):
     omamoris_by_prefecture = service.search_omamori(
-        prefecture=prefecture, protection=protection, limit=limit)
+        prefecture=prefecture,
+        protection=protection,
+        limit=limit,
+        primary_start_key=primary_start_key,
+        sort_start_key=sort_start_key
+    )
     return omamoris_by_prefecture
 
 

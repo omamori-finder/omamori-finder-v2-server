@@ -1,5 +1,6 @@
 import logging
 import uuid
+import boto3
 from fastapi import UploadFile
 from botocore.exceptions import ClientError, BotoCoreError
 from src.schemas.omamori import OmamoriInput, ShrineName, OmamoriSearchResults
@@ -24,42 +25,45 @@ OMAMORI_TABLE = dynamodb.Table("omamori_data")
 def search_omamori(
     prefecture: PrefectureEnum | None,
     protection: ProtectionTypeEnum | None,
-    limit: int
+    limit: int,
+    primary_start_key: str,
+    sort_start_key: str
 ) -> OmamoriSearchResults:
     try:
-        omamori_search_result = {}
+
+        expression_attributes_values = {}
+
+        search_query = {
+            "IndexName": "prefecture_index",
+            "Limit": limit,
+            "ExpressionAttributeValues": expression_attributes_values,
+        }
+
+        if primary_start_key and sort_start_key:
+            query_start_key = {
+                "prefecture": primary_start_key,
+                "uuid": sort_start_key
+            }
+            search_query["ExclusiveStartKey"] = query_start_key
+
+        if protection:
+            expression_attributes_values[":prefecture_val"] = protection.value
+
+            search_query["FilterExpression"] = "protection_type = :protection_val"
 
         if prefecture:
-            expression_attributes_values = {
-                ":prefecture_val": prefecture.value,
-            }
+            expression_attributes_values[":prefecture_val"] = prefecture.value
 
-            omamori_search_result = OMAMORI_TABLE.query(
-                IndexName="prefecture_index",
-                KeyConditionExpression="prefecture = :prefecture_val",
-                ExpressionAttributeValues=expression_attributes_values,
-                Limit=limit
-            )
+            search_query["KeyConditionExpression"] = "prefecture = :prefecture_val"
 
-        if prefecture and protection:
-            expression_attributes_values = {
-                ":prefecture_val": prefecture.value,
-                ":protection_val": protection.value
-            }
-
-            omamori_search_result = OMAMORI_TABLE.query(
-                IndexName="prefecture_index",
-                KeyConditionExpression="prefecture = :prefecture_val",
-                FilterExpression="protection_type = :protection_val",
-                ExpressionAttributeValues=expression_attributes_values,
-                Limit=limit
-            )
+        omamori_search_result = OMAMORI_TABLE.query(**search_query)
 
         last_evaluated_item = omamori_search_result.get("LastEvaluatedKey", {})
 
         return {
             "omamoris": omamori_search_result["Items"],
-            "last_evaluated_item": last_evaluated_item
+            "last_evaluated_item": last_evaluated_item,
+            "TotalResults": omamori_search_result["Count"]
         }
 
     except (ClientError) as err:
