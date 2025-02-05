@@ -6,8 +6,6 @@ from src.utils.enum_types import PrefectureEnum, ProtectionTypeEnum
 
 router = APIRouter()
 
-# -> OmamoriSearchResults
-
 
 @router.get("/omamori/")
 async def search_omamori(
@@ -16,7 +14,7 @@ async def search_omamori(
     limit: int | None = 20,
     primary_start_key: str | None = None,
     sort_start_key: str | None = None
-):
+) -> OmamoriSearchResults:
     omamoris_by_prefecture = service.search_omamori(
         prefecture=prefecture,
         protection=protection,

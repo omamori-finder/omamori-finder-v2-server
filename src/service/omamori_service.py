@@ -1,6 +1,5 @@
 import logging
 import uuid
-import boto3
 from fastapi import UploadFile
 from botocore.exceptions import ClientError, BotoCoreError
 from src.schemas.omamori import OmamoriInput, ShrineName, OmamoriSearchResults
@@ -49,12 +48,16 @@ def search_omamori(
         if protection:
             expression_attributes_values[":prefecture_val"] = protection.value
 
-            search_query["FilterExpression"] = "protection_type = :protection_val"
+            search_query["FilterExpression"] = (
+                "protection_type = :protection_val"
+            )
 
         if prefecture:
             expression_attributes_values[":prefecture_val"] = prefecture.value
 
-            search_query["KeyConditionExpression"] = "prefecture = :prefecture_val"
+            search_query["KeyConditionExpression"] = (
+                "prefecture = :prefecture_val"
+            )
 
         omamori_search_result = OMAMORI_TABLE.query(**search_query)
 
