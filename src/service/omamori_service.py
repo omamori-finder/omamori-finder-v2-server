@@ -66,7 +66,7 @@ def search_omamori(
         return {
             "omamoris": omamori_search_result["Items"],
             "last_evaluated_item": last_evaluated_item,
-            "TotalResults": omamori_search_result["Count"]
+            "total_results": omamori_search_result["Count"]
         }
 
     except (ClientError) as err:

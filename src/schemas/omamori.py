@@ -43,3 +43,4 @@ class OmamoriQuery(OmamoriInput):
 class OmamoriSearchResults(BaseModel):
     omamoris: list[OmamoriQuery]
     last_evaluated_item: dict
+    total_results: int
