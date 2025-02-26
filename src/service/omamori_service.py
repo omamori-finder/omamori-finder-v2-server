@@ -23,36 +23,52 @@ OMAMORI_TABLE = dynamodb.Table("omamori_data")
 
 def search_omamori(
     prefecture: PrefectureEnum | None,
-    protection: ProtectionTypeEnum | None
-) -> list[OmamoriSearchResults]:
+    protection: ProtectionTypeEnum | None,
+    limit: int,
+    prefecture_start_key: str,
+    uuid_start_key: str
+) -> OmamoriSearchResults:
     try:
-        omamori_search_result = {}
+
+        expression_attributes_values = {}
+
+        search_query = {
+            "IndexName": "prefecture_index",
+            "Limit": limit,
+            "ExpressionAttributeValues": expression_attributes_values,
+        }
+
+        if prefecture_start_key and uuid_start_key:
+            query_start_key = {
+                "prefecture": prefecture_start_key,
+                "uuid": uuid_start_key
+            }
+            search_query["ExclusiveStartKey"] = query_start_key
+
+        if protection:
+            expression_attributes_values[":prefecture_val"] = protection.value
+
+            search_query["FilterExpression"] = (
+                "protection_type = :protection_val"
+            )
 
         if prefecture:
-            expression_attributes_values = {
-                ":prefecture_val": prefecture.value,
-            }
+            expression_attributes_values[":prefecture_val"] = prefecture.value
 
-            omamori_search_result = OMAMORI_TABLE.query(
-                IndexName="prefecture_index",
-                KeyConditionExpression="prefecture = :prefecture_val",
-                ExpressionAttributeValues=expression_attributes_values,
+            search_query["KeyConditionExpression"] = (
+                "prefecture = :prefecture_val"
             )
 
-        if prefecture and protection:
-            expression_attributes_values = {
-                ":prefecture_val": prefecture.value,
-                ":protection_val": protection.value
-            }
+        omamori_search_result = OMAMORI_TABLE.query(**search_query)
 
-            omamori_search_result = OMAMORI_TABLE.query(
-                IndexName="prefecture_index",
-                KeyConditionExpression="prefecture = :prefecture_val",
-                FilterExpression="protection_type = :protection_val",
-                ExpressionAttributeValues=expression_attributes_values,
-            )
+        last_evaluated_item = omamori_search_result.get("LastEvaluatedKey", {})
 
-        return omamori_search_result["Items"]
+        return {
+            "omamoris": omamori_search_result["Items"],
+            "last_evaluated_item": last_evaluated_item,
+            "total_results": omamori_search_result["Count"]
+        }
+
     except (ClientError) as err:
         if ClientError:
             logging.error(

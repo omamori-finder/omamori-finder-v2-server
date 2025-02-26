@@ -11,9 +11,17 @@ router = APIRouter()
 async def search_omamori(
     prefecture: PrefectureEnum | None = None,
     protection: ProtectionTypeEnum | None = None,
-) -> list[OmamoriSearchResults]:
+    limit: int | None = 20,
+    prefecture_start_key: str | None = None,
+    uuid_start_key: str | None = None
+) -> OmamoriSearchResults:
     omamoris_by_prefecture = service.search_omamori(
-        prefecture=prefecture, protection=protection)
+        prefecture=prefecture,
+        protection=protection,
+        limit=limit,
+        prefecture_start_key=prefecture_start_key,
+        uuid_start_key=uuid_start_key
+    )
     return omamoris_by_prefecture
 
 

@@ -36,5 +36,11 @@ class OmamoriInput(BaseModel):
     upload_status: UploadStatus | None = UploadStatus.NOT_STARTED
 
 
-class OmamoriSearchResults(OmamoriInput):
+class OmamoriQuery(OmamoriInput):
     _upload_status: UploadStatus | None = UploadStatus.NOT_STARTED
+
+
+class OmamoriSearchResults(BaseModel):
+    omamoris: list[OmamoriQuery]
+    last_evaluated_item: dict
+    total_results: int
