@@ -33,7 +33,11 @@ async def create_omamori(omamori: OmamoriInput) -> OmamoriOut:
 
 
 @router.post("/uploadpicture")
-async def upload_omamori_picture(picture: UploadFile, uuid: str = Form(...)):
+async def upload_omamori_picture(
+    picture: UploadFile,
+    uuid: str = Form(...),
+    prefecture: str = Form(...)
+):
     uploaded_picture = service.upload_omamori_picture(
-        img_file=picture, uuid=uuid)
+        img_file=picture, uuid=uuid, prefecture=prefecture)
     return uploaded_picture
