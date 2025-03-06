@@ -127,11 +127,12 @@ def create_omamori(omamori: OmamoriInput):
         )
 
 
-def upload_omamori_picture(img_file: UploadFile, uuid: str):
+def upload_omamori_picture(img_file: UploadFile, uuid: str, prefecture: str):
     try:
         existing_omamori = OMAMORI_TABLE.get_item(
             Key={
-                "uuid": uuid
+                "uuid": uuid,
+                "prefecture": prefecture
             }
         )
 
@@ -172,7 +173,8 @@ def upload_omamori_picture(img_file: UploadFile, uuid: str):
 
         updated_omamori = OMAMORI_TABLE.update_item(
             Key={
-                "uuid": uuid
+                "uuid": uuid,
+                "prefecture": prefecture
             },
             UpdateExpression=update_expression,
             ExpressionAttributeNames=expression_attribute_names,
